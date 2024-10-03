@@ -579,11 +579,9 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             //pause the sensors (aka joysticks)
             if (app.getContext() != null) {
                 JoyInput joyInput = app.getContext().getJoyInput();
-                if (joyInput != null) {
-                    if (joyInput instanceof AndroidSensorJoyInput) {
-                        AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
-                        androidJoyInput.pauseSensors();
-                    }
+                if (joyInput != null && joyInput instanceof AndroidSensorJoyInput) {
+                    AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
+                    androidJoyInput.pauseSensors();
                 }
             }
         }
