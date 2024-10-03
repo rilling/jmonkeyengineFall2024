@@ -98,6 +98,8 @@ public class XMLImporter implements JmeImporter {
 
     public Savable load(InputStream f) throws IOException {
         try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             domIn = new DOMInputCapsule(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f), this);
             return domIn.readSavable(null, null);
         } catch (SAXException | ParserConfigurationException e) {
