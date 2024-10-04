@@ -298,24 +298,40 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
-    private class AVIStreamList {
+    public class AVIStreamList {
 
-        public byte[] fcc = new byte[]{'L', 'I', 'S', 'T'};
-        public int size = 124;
-        public byte[] fcc2 = new byte[]{'s', 't', 'r', 'l'};
+        private static final byte[] FCC = new byte[]{'L', 'I', 'S', 'T'};
+        private static final int SIZE = 124;
+        private static final byte[] FCC2 = new byte[]{'s', 't', 'r', 'l'};
 
+        // Constructor
         public AVIStreamList() {
         }
 
+        // Accessor methods if needed (only getters provided since the fields are constants)
+        public byte[] getFcc() {
+            return FCC;
+        }
+
+        public int getSize() {
+            return SIZE;
+        }
+
+        public byte[] getFcc2() {
+            return FCC2;
+        }
+
+        // Method to convert to bytes
         public byte[] toBytes() throws IOException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(size)));
-            baos.write(fcc2);
-
+            baos.write(FCC);  // Access the constant
+            baos.write(intBytes(swapInt(SIZE)));  // Access the constant
             return baos.toByteArray();
         }
+
+        // Other existing methods like intBytes() and swapInt() should remain unchanged.
     }
+
 
     private class AVIStreamHeader {
         /*
