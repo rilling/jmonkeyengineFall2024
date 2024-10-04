@@ -1,6 +1,0 @@
-projectKey=jme3-desktop
-serverUrl=http://localhost:9000
-serverVersion=10.6.0.92116
-dashboardUrl=http://localhost:9000/dashboard?id=jme3-desktop
-ceTaskId=393f765a-a70d-4868-b72d-e183bf8992b6
-ceTaskUrl=http://localhost:9000/api/ce/task?id=393f765a-a70d-4868-b72d-e183bf8992b6
