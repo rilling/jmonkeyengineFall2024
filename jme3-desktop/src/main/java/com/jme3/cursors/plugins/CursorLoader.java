@@ -275,7 +275,7 @@ public class CursorLoader implements AssetLoader {
         BufferedImage[] bi;
         // Check resource type field.
         int DE_LENGTH = 16; // directory entry length
-        int BMIH_LENGTH = 40; // BITMAPINFOHEADER length
+        int bmihLength = 40; // BITMAPINFOHEADER length
 
         if (icoImage[2] != 1 && icoImage[2] != 2 || icoImage[3] != 0) {
             throw new IllegalArgumentException("Bad data in ICO/CUR file. ImageType has to be either 1 or 2.");
@@ -378,7 +378,7 @@ public class CursorLoader implements AssetLoader {
 
                 // Parse image to image buffer.
 
-                int colorTableOffset = imageOffset + BMIH_LENGTH;
+                int colorTableOffset = imageOffset + bmihLength;
 
                 if (colorCount[i] == 2) {
                     int xorImageOffset = colorTableOffset + 2 * 4;
