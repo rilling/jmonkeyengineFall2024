@@ -98,7 +98,7 @@ public class MjpegFileWriter implements AutoCloseable {
         aviOutput.write(listBytes);
         indexlist = new AVIIndexList();
 
-        position = (long) headerBytes.length + listBytes.length;
+        position = headerBytes.length + listBytes.length;
     }
 
     public void addImage(Image image) throws Exception {
@@ -130,6 +130,7 @@ public class MjpegFileWriter implements AutoCloseable {
         }
         byte[] data = baos.toByteArray();
         aviOutput.write(data);
+        imageData = null;
 
         numFrames++; //add a frame
         position += data.length;
