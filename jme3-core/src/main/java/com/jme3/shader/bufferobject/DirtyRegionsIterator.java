@@ -35,7 +35,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * An helper class that iterates and merges dirty regions
@@ -89,17 +88,12 @@ public class DirtyRegionsIterator implements Iterator<BufferRegion> {
     }
 
     public BufferRegion next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements in the iterator.");
-        }
+
         dirtyRegion.bo = bufferObject;
         dirtyRegion.regions.clear();
 
         if (bufferObject.regions.size() == 0) {
-            if (!bufferObject.isUpdateNeeded()) {
-                throw new NoSuchElementException("No more elements in the iterator.");
-            }
-            }
+            if (!bufferObject.isUpdateNeeded()) return null;
             dirtyRegion.fullBufferRegion = true;
             dirtyRegion.end = bufferObject.getData().limit();
             dirtyRegion.start = 0;
