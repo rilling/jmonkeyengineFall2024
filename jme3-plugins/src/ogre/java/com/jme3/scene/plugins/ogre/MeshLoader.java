@@ -870,7 +870,6 @@ public class MeshLoader extends DefaultHandler implements AssetLoader {
             // Now, hack is applied for both desktop and android to avoid
             // checking with JmeSystem.
             SAXParserFactory factory = SAXParserFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             factory.setNamespaceAware(true);
 
             XMLReader xr = factory.newSAXParser().getXMLReader();

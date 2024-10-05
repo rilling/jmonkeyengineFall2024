@@ -127,7 +127,6 @@ class SceneMaterialLoader extends DefaultHandler {
             reset();
             
             SAXParserFactory factory = SAXParserFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             factory.setNamespaceAware(true);  
             XMLReader xr = factory.newSAXParser().getXMLReader();  
 
