@@ -46,7 +46,7 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
     private final String ORIENTATION_X_MINUS = "Orientation_X_Minus";
     private final String ORIENTATION_Y_PLUS = "Orientation_Y_Plus";
     private final String ORIENTATION_Y_MINUS = "Orientation_Y_Minus";
-    private final String ORIENTATION_Z_PLUS = "Orientation_Z_Plus";
+    private static final String ORIENTATION_Z_PLUS = "Orientation_Z_Plus";
     private static final String ORIENTATION_Z_MINUS = "Orientation_Z_Minus";
 
 
