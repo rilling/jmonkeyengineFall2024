@@ -148,17 +148,6 @@ public class MjpegFileWriter {
         raf.close();
     }
 
-    // public void writeAVI(File file) throws Exception
-    // {
-    // OutputStream os = new FileOutputStream(file);
-    //
-    // // RIFFHeader
-    // // AVIMainHeader
-    // // AVIStreamList
-    // // AVIStreamHeader
-    // // AVIStreamFormat
-    // // write 00db and image bytes...
-    // }
     public static int swapInt(int v) {
         return (v >>> 24) | (v << 24) | ((v << 8) & 0x00FF0000) | ((v >> 8) & 0x0000FF00);
     }
