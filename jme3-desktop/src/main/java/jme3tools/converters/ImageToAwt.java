@@ -49,7 +49,17 @@ public class ImageToAwt {
 
     private static class DecodeParams {
 
-        final int bpp, am, rm, gm, bm, as, rs, gs, bs, im, is;
+        final int bpp;
+        final int am;
+        final int rm;
+        final int gm;
+        final int bm;
+        final int as;
+        final int rs;
+        final int gs;
+        final int bs;
+        final int im;
+        final int is;
 
         public DecodeParams(int bpp, int am, int rm, int gm, int bm, int as, int rs, int gs, int bs, int im, int is) {
             this.bpp = bpp;
