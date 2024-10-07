@@ -392,7 +392,7 @@ public class MjpegFileWriter {
         public int biHeight = 0;
         public short biPlanes = 1;
         public short biBitCount = 24;
-        public byte[] biCompression = new byte[]{'M', 'J', 'P', 'G'};
+        public final static byte[] biCompression = new byte[]{'M', 'J', 'P', 'G'};
         public int biSizeImage = 0;                                // width
         // x
         // height
