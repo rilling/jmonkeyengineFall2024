@@ -667,7 +667,7 @@ public class CursorLoader implements AssetLoader {
                 hotspotx = 0;
                 hotspoty = height - 1;
             }
-//            System.out.println("Image type = " + (type == 1 ? "CUR" : "ICO"));
+
             if (rate == 0) {
                 rate = jiffy;
             }
