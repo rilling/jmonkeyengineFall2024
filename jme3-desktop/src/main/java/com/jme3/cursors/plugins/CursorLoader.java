@@ -370,7 +370,7 @@ public class CursorLoader implements AssetLoader {
                             colorCount[i] = (int) Math.pow(2, bitCount);
                         }
                     } else {
-                        colorCount[i] = (int) Math.pow(2, bitCount * planes);
+                        colorCount[i] = (int) Math.pow(2, (double) bitCount * planes);
                     }
                 }
 
