@@ -31,6 +31,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import android.graphics.Point;
 
 /**
  * <code>AndroidHarness</code> wraps a jme application object and runs it on
@@ -216,7 +217,11 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             //TODO try to find a better way to get a hand on the resolution
             WindowManager wind = this.getWindowManager();
             Display disp = wind.getDefaultDisplay();
-            Log.d("AndroidHarness", "Resolution from Window, width:" + disp.getWidth() + ", height: " + disp.getHeight());
+            Point size = new Point();
+            disp.getSize(size);  // Replaces the deprecated methods
+            int width = size.x;
+            int height = size.y;
+            Log.d("AndroidHarness", "Resolution from Window, width:" + width + ", height: " + height);
 
             // Create Settings
             logger.log(Level.FINE, "Creating settings");
@@ -232,7 +237,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             settings.setSamples(eglSamples);
             settings.setStencilBits(eglStencilBits);
 
-            settings.setResolution(disp.getWidth(), disp.getHeight());
+            settings.setResolution(width, height);
             settings.setAudioRenderer(audioRendererType);
 
             settings.setFrameRate(frameRate);
@@ -412,7 +417,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
 
             Drawable drawable = this.getResources().getDrawable(splashPicID);
             if (drawable instanceof NinePatchDrawable) {
-                splashImageView.setBackgroundDrawable(drawable);
+                splashImageView.setBackground(drawable);
             } else {
                 splashImageView.setImageResource(splashPicID);
             }
