@@ -80,7 +80,7 @@ public class AwtPanel extends Canvas implements SceneProcessor {
     private int newWidth = 1;
     private int newHeight = 1;
     private final AtomicBoolean reshapeNeeded = new AtomicBoolean(false);
-    private transient final Object lock = new Object();
+    private final transient Object lock = new Object();
 
     public AwtPanel(PaintMode paintMode) {
         this(paintMode, false);
