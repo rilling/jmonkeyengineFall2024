@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class AndroidHarness extends Activity implements TouchListener, DialogInterface.OnClickListener, SystemListener {
 
-    protected final static Logger logger = Logger.getLogger(AndroidHarness.class.getName());
+    protected static final Logger logger = Logger.getLogger(AndroidHarness.class.getName());
     /**
      * The application class to start
      */
@@ -172,7 +172,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
     protected boolean isGLThreadPaused = true;
     protected ImageView splashImageView = null;
     protected FrameLayout frameLayout = null;
-    final private String ESCAPE_EVENT = "TouchEscape";
+    final private String escapeEvent = "TouchEscape";
     private boolean firstDrawFrame = true;
     private boolean inConfigChange = false;
 
@@ -378,7 +378,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
      */
     @Override
     public void onTouch(String name, TouchEvent evt, float tpf) {
-        if (name.equals(ESCAPE_EVENT)) {
+        if (name.equals(escapeEvent)) {
             switch (evt.getType()) {
                 case KEY_UP:
                     runOnUiThread(new Runnable() {
@@ -485,8 +485,8 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
                 app.getInputManager().deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
             }
 
-            app.getInputManager().addMapping(ESCAPE_EVENT, new TouchTrigger(TouchInput.KEYCODE_BACK));
-            app.getInputManager().addListener(this, new String[]{ESCAPE_EVENT});
+            app.getInputManager().addMapping(escapeEvent, new TouchTrigger(TouchInput.KEYCODE_BACK));
+            app.getInputManager().addListener(this, new String[]{escapeEvent});
         }
     }
 
