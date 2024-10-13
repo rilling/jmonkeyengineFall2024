@@ -53,7 +53,6 @@ import com.jme3.input.android.AndroidSensorJoyInput;
 import com.jme3.input.controls.TouchListener;
 import com.jme3.input.controls.TouchTrigger;
 import com.jme3.input.event.TouchEvent;
-import static com.jme3.input.event.TouchEvent.Type.KEY_UP;
 import com.jme3.system.AppSettings;
 import com.jme3.system.SystemListener;
 import com.jme3.system.android.JmeAndroidSystem;
