@@ -17,7 +17,11 @@ buildscript {
 }
 
 plugins {
+<<<<<<< HEAD
   id "org.sonarqube" version "5.1.0.4882"
+=======
+    id "org.sonarqube" version "5.1.0.4882"
+>>>>>>> 79ffd7ec69c0f14c2d0cb9b3804d1a101fec3188
 }
 
 allprojects {
