@@ -325,10 +325,10 @@ public class AWTComponentRenderer {
         synchronized (byteBuffer) {
           
           for(int i = 0; i < width * height; i++) {
-            imageDataBuffer[i] =   ((0xff & byteBuffer[i*4+3]) << 24)  // Alpha 
-                                 | ((0xff & byteBuffer[i*4])   << 16)  // Red
-                                 | ((0xff & byteBuffer[i*4+1]) <<  8)  // Green 
-                                 | ((0xff & byteBuffer[i*4+2]));       // BLue
+            imageDataBuffer[i] = (0xff & byteBuffer[i * 4 + 3]) << 24 // Alpha
+                | (0xff & byteBuffer[i * 4]) << 16 // Red
+                | (0xff & byteBuffer[i * 4 + 1]) << 8 // Green
+                | (0xff & byteBuffer[i * 4 + 2]); // Blue
             
           }
         }
