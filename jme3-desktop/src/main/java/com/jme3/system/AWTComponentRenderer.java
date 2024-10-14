@@ -363,7 +363,8 @@ public class AWTComponentRenderer {
 
   /**
    * Get the image byte buffer.
-   * @return the image byte buffer.
+   * 
+   * @return the image byte buffer
    */
   protected int[] getImageByteBuffer() {
     return imageByteBuffer;
