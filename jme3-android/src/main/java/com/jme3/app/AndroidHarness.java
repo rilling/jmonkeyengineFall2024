@@ -240,8 +240,8 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             // Create application instance
             try {
                 if (app == null) {
-                    Class clazz = Class.forName(appClass);
-                    app = (LegacyApplication) clazz.getDeclaredConstructor().newInstance();
+                    Class<? extends LegacyApplication> clazz = Class.forName(appClass).asSubclass(LegacyApplication.class);
+                    app = clazz.getDeclaredConstructor().newInstance();
                 }
 
                 app.setSettings(settings);
