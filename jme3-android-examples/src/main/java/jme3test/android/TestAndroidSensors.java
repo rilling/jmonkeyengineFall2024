@@ -77,6 +77,8 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
     // toggle to enable controlling geometry rotation
     boolean enableGeometryRotation = true;
 
+    private static final String MOUSECLICK = "MouseClick";
+
     // Make sure to set joystickEventsEnabled = true in MainActivity for Android
 
     private float toDegrees(float rad) {
@@ -135,8 +137,8 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
 
         // Touch (aka MouseInput.BUTTON_LEFT) is used to record the starting
         // orientation when using absolute rotations
-        inputManager.addMapping("MouseClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(this, "MouseClick");
+        inputManager.addMapping(MOUSECLICK, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(this, MOUSECLICK);
 
         Joystick[] joysticks = inputManager.getJoysticks();
         if (joysticks == null || joysticks.length < 1) {
@@ -231,7 +233,7 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
 
     @Override
     public void onAction(String string, boolean pressed, float tpf) {
-       if (string.equalsIgnoreCase("MouseClick") && pressed) {
+       if (string.equalsIgnoreCase(MOUSECLICK) && pressed) {
             // Calibrate the axis (set new zero position) if the axis
             // is a sensor joystick axis
             for (IntMap.Entry<Joystick> entry : joystickMap) {
