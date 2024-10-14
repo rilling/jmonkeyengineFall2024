@@ -287,7 +287,7 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         logger.log(Level.INFO, getBuildInfo());
         if (!lowPermissions) {
             if (NativeLibraryLoader.isUsingNativeBullet()) {
-                NativeLibraryLoader.loadNativeLibrary(NativeLibraries.BulletJme.getName(), true);
+                NativeLibraryLoader.loadNativeLibrary(NativeLibraries.BULLET_JME.getName(), true);
             }
         }
     }
