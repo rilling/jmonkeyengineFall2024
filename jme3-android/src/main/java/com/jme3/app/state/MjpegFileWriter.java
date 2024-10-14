@@ -217,6 +217,7 @@ public class MjpegFileWriter {
 
     private class AVIMainHeader {
 
+
         public byte[] fcc = new byte[]{'a', 'v', 'i', 'h'};
         public int cb = 56;
         public int dwMicroSecPerFrame = 0;                                // (1
