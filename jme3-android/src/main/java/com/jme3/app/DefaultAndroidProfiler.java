@@ -36,7 +36,7 @@ import android.os.Build;
 import com.jme3.profile.*;
 
 
-
+import static com.jme3.profile.AppStep.EndFrame;
 import static com.jme3.profile.AppStep.ProcessAudio;
 import static com.jme3.profile.AppStep.ProcessInput;
 import static com.jme3.profile.AppStep.QueuedTasks;
