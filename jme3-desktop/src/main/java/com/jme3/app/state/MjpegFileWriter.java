@@ -219,15 +219,6 @@ public class MjpegFileWriter implements AutoCloseable {
     }
 
     private class AVIMainHeader {
-        /*
-         *
-         * FOURCC fcc; DWORD cb; DWORD dwMicroSecPerFrame; DWORD
-         * dwMaxBytesPerSec; DWORD dwPaddingGranularity; DWORD dwFlags; DWORD
-         * dwTotalFrames; DWORD dwInitialFrames; DWORD dwStreams; DWORD
-         * dwSuggestedBufferSize; DWORD dwWidth; DWORD dwHeight; DWORD
-         * dwReserved[4];
-         */
-
         public byte[] fcc = new byte[]{'a', 'v', 'i', 'h'};
         public int cb = 56;
         public int dwMicroSecPerFrame = 0;                                // (1
