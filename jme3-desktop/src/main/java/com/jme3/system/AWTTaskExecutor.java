@@ -67,7 +67,7 @@ public class AWTTaskExecutor {
   private final List<Runnable> waitTasks;
 
   private AWTTaskExecutor() {
-    waitTasks = new LinkedList<Runnable>();
+    waitTasks = new LinkedList<>();
   }
 
   public List<Runnable> getWaitingTasks(){
