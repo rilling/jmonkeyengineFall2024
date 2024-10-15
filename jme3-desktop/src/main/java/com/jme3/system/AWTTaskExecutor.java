@@ -97,7 +97,7 @@ public class AWTTaskExecutor {
 
       if (waitTasks.isEmpty()) return;
 
-      lock.readLock().lock();
+      lock.readLock().lock()
       
       try {
         for(Runnable runnable : waitTasks) {
