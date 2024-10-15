@@ -98,7 +98,7 @@ public class MjpegFileWriter implements AutoCloseable {
         aviOutput.write(listBytes);
         indexlist = new AVIIndexList();
 
-        position = headerBytes.length + listBytes.length;
+        position = (long) headerBytes.length + listBytes.length;
     }
 
     public void addImage(Image image) throws Exception {
@@ -130,7 +130,6 @@ public class MjpegFileWriter implements AutoCloseable {
         }
         byte[] data = baos.toByteArray();
         aviOutput.write(data);
-        imageData = null;
 
         numFrames++; //add a frame
         position += data.length;
@@ -159,17 +158,6 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
-    // public void writeAVI(File file) throws Exception
-    // {
-    // OutputStream os = new FileOutputStream(file);
-    //
-    // // RIFFHeader
-    // // AVIMainHeader
-    // // AVIStreamList
-    // // AVIStreamHeader
-    // // AVIStreamFormat
-    // // write 00db and image bytes...
-    // }
     public static int swapInt(int v) {
         return (v >>> 24) | (v << 24) | ((v << 8) & 0x00FF0000) | ((v >> 8) & 0x0000FF00);
     }
@@ -231,15 +219,6 @@ public class MjpegFileWriter implements AutoCloseable {
     }
 
     private class AVIMainHeader {
-        /*
-         *
-         * FOURCC fcc; DWORD cb; DWORD dwMicroSecPerFrame; DWORD
-         * dwMaxBytesPerSec; DWORD dwPaddingGranularity; DWORD dwFlags; DWORD
-         * dwTotalFrames; DWORD dwInitialFrames; DWORD dwStreams; DWORD
-         * dwSuggestedBufferSize; DWORD dwWidth; DWORD dwHeight; DWORD
-         * dwReserved[4];
-         */
-
         public byte[] fcc = new byte[]{'a', 'v', 'i', 'h'};
         public int cb = 56;
         public int dwMicroSecPerFrame = 0;                                // (1
