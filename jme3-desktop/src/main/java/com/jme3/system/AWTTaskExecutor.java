@@ -76,7 +76,7 @@ public class AWTTaskExecutor {
   
   /**
    * Add the given {@link Runnable runnable} to the list of planned executions. 
-   * @param task the task to add.
+   * @param task the task to add
    * @see #execute()
    */
   public void addToExecute(final Runnable task) {
