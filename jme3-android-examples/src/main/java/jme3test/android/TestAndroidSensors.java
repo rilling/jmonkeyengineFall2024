@@ -77,8 +77,6 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
     // toggle to enable controlling geometry rotation
     boolean enableGeometryRotation = true;
 
-    private static final String MOUSECLICK = "MouseClick";
-
     // Make sure to set joystickEventsEnabled = true in MainActivity for Android
 
     private float toDegrees(float rad) {
@@ -90,7 +88,6 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
 
         // useAbsolute = true;
         // enableRumble = true;
-        private static final String COLOR = "Color";
 
         if (enableFlyByCameraRotation) {
             flyCam.setEnabled(true);
@@ -104,21 +101,21 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
 
         Geometry geoX = new Geometry("X", lineX);
         Material matX = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        matX.setColor(COLOR, ColorRGBA.Red);
+        matX.setColor("Color", ColorRGBA.Red);
         matX.getAdditionalRenderState().setLineWidth(30);
         geoX.setMaterial(matX);
         rootNode.attachChild(geoX);
 
         Geometry geoY = new Geometry("Y", lineY);
         Material matY = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        matY.setColor(COLOR, ColorRGBA.Green);
+        matY.setColor("Color", ColorRGBA.Green);
         matY.getAdditionalRenderState().setLineWidth(30);
         geoY.setMaterial(matY);
         rootNode.attachChild(geoY);
 
         Geometry geoZ = new Geometry("Z", lineZ);
         Material matZ = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        matZ.setColor(COLOR, ColorRGBA.Blue);
+        matZ.setColor("Color", ColorRGBA.Blue);
         matZ.getAdditionalRenderState().setLineWidth(30);
         geoZ.setMaterial(matZ);
         rootNode.attachChild(geoZ);
@@ -126,7 +123,7 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
         Box b = new Box(1, 1, 1);
         geomZero = new Geometry("Box", b);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor(COLOR, ColorRGBA.Yellow);
+        mat.setColor("Color", ColorRGBA.Yellow);
         Texture tex_ml = assetManager.loadTexture("Interface/Logo/Monkey.jpg");
         mat.setTexture("ColorMap", tex_ml);
         geomZero.setMaterial(mat);
@@ -137,8 +134,8 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
 
         // Touch (aka MouseInput.BUTTON_LEFT) is used to record the starting
         // orientation when using absolute rotations
-        inputManager.addMapping(MOUSECLICK, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(this, MOUSECLICK);
+        inputManager.addMapping("MouseClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(this, "MouseClick");
 
         Joystick[] joysticks = inputManager.getJoysticks();
         if (joysticks == null || joysticks.length < 1) {
@@ -233,7 +230,7 @@ public class TestAndroidSensors extends SimpleApplication implements ActionListe
 
     @Override
     public void onAction(String string, boolean pressed, float tpf) {
-       if (string.equalsIgnoreCase(MOUSECLICK) && pressed) {
+       if (string.equalsIgnoreCase("MouseClick") && pressed) {
             // Calibrate the axis (set new zero position) if the axis
             // is a sensor joystick axis
             for (IntMap.Entry<Joystick> entry : joystickMap) {
