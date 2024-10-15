@@ -1,6 +1,0 @@
-projectKey=jmonkeyengineFall2024
-serverUrl=http://localhost:9000
-serverVersion=10.7.0.96327
-dashboardUrl=http://localhost:9000/dashboard?id=jmonkeyengineFall2024
-ceTaskId=a4474288-3df7-46dd-bbd5-3b13c62a72a2
-ceTaskUrl=http://localhost:9000/api/ce/task?id=a4474288-3df7-46dd-bbd5-3b13c62a72a2
