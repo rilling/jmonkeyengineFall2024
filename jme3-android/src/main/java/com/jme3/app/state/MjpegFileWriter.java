@@ -369,6 +369,13 @@ public class MjpegFileWriter {
     }
 
     private class AVIStreamFormat {
+        /*
+         * FOURCC fcc; DWORD cb; DWORD biSize; LONG biWidth; LONG biHeight; WORD
+         * biPlanes; WORD biBitCount; DWORD biCompression; DWORD biSizeImage;
+         * LONG biXPelsPerMeter; LONG biYPelsPerMeter; DWORD biClrUsed; DWORD
+         * biClrImportant;
+         */
+
         public byte[] fcc = new byte[]{'s', 't', 'r', 'f'};
         public int cb = 40;
         public int biSize = 40;                               // same
