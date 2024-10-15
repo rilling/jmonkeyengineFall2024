@@ -127,7 +127,6 @@ public class CursorLoader implements AssetLoader {
                     nextInt = getNext(leIn);
                     while (nextInt >= 0) {
                         if (nextInt == 0x68696e61) {
-//                            System.out.println("we have 'anih' header");
                             leIn.skipBytes(8); // internal struct length (always 36)
                             numIcons = leIn.readInt();
                             steps = leIn.readInt(); // number of blits for ani cycles
