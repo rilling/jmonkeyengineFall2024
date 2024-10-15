@@ -328,7 +328,7 @@ public class AWTComponentRenderer {
             imageDataBuffer[i] =   ((0xff & byteBuffer[i*4+3]) << 24)  // Alpha 
                                  | ((0xff & byteBuffer[i*4])   << 16)  // Red
                                  | ((0xff & byteBuffer[i*4+1]) <<  8)  // Green 
-                                 | ((0xff & byteBuffer[i*4+2]));       // BLue
+                                 | (0xff & byteBuffer[i*4+2]);         // BLue
             
           }
         }
