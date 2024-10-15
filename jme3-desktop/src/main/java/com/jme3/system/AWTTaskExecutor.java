@@ -67,7 +67,7 @@ public class AWTTaskExecutor {
   private final List<Runnable> waitTasks;
 
   private AWTTaskExecutor() {
-    waitTasks = new LinkedList<Runnable>();
+    waitTasks = new LinkedList<>();
   }
 
   public List<Runnable> getWaitingTasks(){
@@ -82,7 +82,7 @@ public class AWTTaskExecutor {
   public void addToExecute(final Runnable task) {
     lock.writeLock().lock();
     try {
-      waitTasks.add(task)
+      waitTasks.add(task);
     } catch (Exception e) {
       // This try catch block enable to free the lock in case of any unexpected error.
     }
@@ -107,7 +107,7 @@ public class AWTTaskExecutor {
         // This try catch block enable to free the lock in case of any unexpected error.
       }
       
-      waitTasks.clear()
+      waitTasks.clear();
       
       lock.readLock().unlock();
   }
