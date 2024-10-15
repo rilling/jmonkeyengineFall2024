@@ -306,6 +306,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public byte[] fcc2 = new byte[]{'s', 't', 'r', 'l'};
 
         public AVIStreamList() {
+            throw new UnsupportedOperationException("AVIStreamList constructor is not supported.");
         }
 
         public byte[] toBytes() throws IOException {
@@ -472,6 +473,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public List<AVIIndex> ind = new ArrayList<>();
 
         public AVIIndexList() {
+            throw new UnsupportedOperationException("AVIIndexList constructor is not supported.");
         }
 
         @SuppressWarnings("unused")
