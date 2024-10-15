@@ -114,7 +114,6 @@ public class MjpegFileWriter {
             }
         }
 
-
         numFrames++; //add a frame
     }
 
