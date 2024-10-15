@@ -34,13 +34,11 @@ package com.jme3.app.state;
 import java.awt.Component;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.system.AWTFrameProcessor;
 import com.jme3.system.AWTTaskExecutor;
 
 /**
- * An app state dedicated to the rendering of a JMonkey application within an AWT component.
+ * An to the  JMonkey application within an AWT component.
  * @author Julien Seinturier - COMEX SA - <a href="http://www.seinturier.fr">http://www.seinturier.fr</a>
  */
 public class AWTComponentAppState extends AbstractAppState {
