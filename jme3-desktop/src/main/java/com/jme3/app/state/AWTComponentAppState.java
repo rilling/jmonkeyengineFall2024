@@ -4,7 +4,7 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
- * met
+ * met:
  *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
@@ -38,7 +38,7 @@ import com.jme3.system.AWTFrameProcessor;
 import com.jme3.system.AWTTaskExecutor;
 
 /**
- * An app state dedicated to the rendering of a JMonkey application within an AWT component.
+ * An to the rendering of a JMonkey application within an AWT component.
  * @author Julien Seinturier - COMEX SA - <a href="http://www.seinturier.fr">http://www.seinturier.fr</a>
  */
 public class AWTComponentAppState extends AbstractAppState {
