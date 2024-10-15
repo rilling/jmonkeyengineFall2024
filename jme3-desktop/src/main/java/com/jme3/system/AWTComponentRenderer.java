@@ -227,7 +227,6 @@ public class AWTComponentRenderer {
       } else {
         System.out.println("AWT component "+destination.getClass().getSimpleName()+" does not provide 2D graphics capabilities.");
         return null;
-        //throw new IllegalArgumentException("AWT component "+destination.getClass().getSimpleName()+" does not provide 2D graphics capabilities.");
       }
     } else {
       throw new IllegalArgumentException("destination component cannot be null");
