@@ -82,7 +82,7 @@ public class AWTTaskExecutor {
   public void addToExecute(final Runnable task) {
     lock.writeLock().lock();
     try {
-      waitTasks.add(task)
+      waitTasks.add(task);
     } catch (Exception e) {
       // This try catch block enable to free the lock in case of any unexpected error.
     }
