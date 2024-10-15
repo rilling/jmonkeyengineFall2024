@@ -38,7 +38,7 @@ import com.jme3.system.AWTFrameProcessor;
 import com.jme3.system.AWTTaskExecutor;
 
 /**
- * An to the of a JMonkey application within an AWT component.
+ * An to the o a JMonkey application within an AWT component.
  * @author Julien Seinturier - COMEX SA - <a href="http://www.seinturier.fr">http://www.seinturier.fr</a>
  */
 public class AWTComponentAppState extends AbstractAppState {
