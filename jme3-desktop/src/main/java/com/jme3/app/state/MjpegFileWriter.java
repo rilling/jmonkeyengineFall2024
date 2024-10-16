@@ -196,7 +196,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public byte[] fcc2 = new byte[]{'A', 'V', 'I', ' '};
         public byte[] fcc3 = new byte[]{'L', 'I', 'S', 'T'};
         public int listSize = 200;
-        private static final byte[] fcc4 = new byte[]{'h', 'd', 'r', 'l'};
+        private byte[] fcc4 = new byte[]{'h', 'd', 'r', 'l'};
 
         public RIFFHeader() {
         }
