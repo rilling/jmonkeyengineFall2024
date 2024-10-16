@@ -502,12 +502,11 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
-    private class AVIJunk {
+    private static class AVIJunk {
 
-        public byte[] fcc = new byte[]{'J', 'U', 'N', 'K'};
-        public int size = 1808;
-        public byte[] data = new byte[size];
-
+        public static final byte[] fcc = new byte[] { 'J', 'U', 'N', 'K' };
+        public static final int size = 1808;
+        public static final byte[] data = new byte[size];
         public AVIJunk() {
             Arrays.fill(data, (byte) 0);
         }
