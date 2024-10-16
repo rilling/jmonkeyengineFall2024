@@ -70,11 +70,11 @@ public class MjpegFileWriter implements AutoCloseable {
     long position = 0;
     AVIIndexList indexlist = null;
 
-    public MjpegFileWriter(File aviFile, int width, int height, double framerate) throws Exception {
+    public MjpegFileWriter(File aviFile, int width, int height, double framerate) throws IOException {
         this(aviFile, width, height, framerate, 0);
     }
 
-    public MjpegFileWriter(File aviFile, int width, int height, double framerate, int numFrames) throws Exception {
+    public MjpegFileWriter(File aviFile, int width, int height, double framerate, int numFrames) throws IOException {
         this.aviFile = aviFile;
         this.width = width;
         this.height = height;
@@ -101,15 +101,15 @@ public class MjpegFileWriter implements AutoCloseable {
         position = (long) headerBytes.length + listBytes.length;
     }
 
-    public void addImage(Image image) throws Exception {
+    public void addImage(Image image) throws IOException {
         addImage(image, 0.8f);
     }
 
-    public void addImage(Image image, float quality) throws Exception {
+    public void addImage(Image image, float quality) throws IOException {
         addImage(writeImageToBytes(image, quality));
     }
 
-    public void addImage(byte[] imageData) throws Exception {
+    public void addImage(byte[] imageData) throws IOException {
         byte[] fcc = new byte[]{'0', '0', 'd', 'b'};
         int useLength = imageData.length;
         int extra = (useLength + (int) position) % 4;
@@ -196,7 +196,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public byte[] fcc2 = new byte[]{'A', 'V', 'I', ' '};
         public byte[] fcc3 = new byte[]{'L', 'I', 'S', 'T'};
         public int listSize = 200;
-        public byte[] fcc4 = new byte[]{'h', 'd', 'r', 'l'};
+        private byte[] fcc4 = new byte[]{'h', 'd', 'r', 'l'};
 
         public RIFFHeader() {
         }
@@ -285,6 +285,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public byte[] fcc2 = new byte[]{'s', 't', 'r', 'l'};
 
         public AVIStreamList() {
+            throw new UnsupportedOperationException("AVIStreamList constructor is not supported.");
         }
 
         public byte[] toBytes() throws IOException {
@@ -451,6 +452,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public List<AVIIndex> ind = new ArrayList<>();
 
         public AVIIndexList() {
+            throw new UnsupportedOperationException("AVIIndexList constructor is not supported.");
         }
 
         @SuppressWarnings("unused")
@@ -520,7 +522,7 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
-    public byte[] writeImageToBytes(Image image, float quality) throws Exception {
+    public byte[] writeImageToBytes(Image image, float quality) throws IOException {
         BufferedImage bi;
         if (image instanceof BufferedImage && ((BufferedImage) image).getType() == BufferedImage.TYPE_INT_RGB) {
             bi = (BufferedImage) image;
