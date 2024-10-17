@@ -130,7 +130,6 @@ public class MjpegFileWriter implements AutoCloseable {
         }
         byte[] data = baos.toByteArray();
         aviOutput.write(data);
-
         numFrames++; //add a frame
         position += data.length;
     }
@@ -299,15 +298,7 @@ public class MjpegFileWriter implements AutoCloseable {
     }
 
     private class AVIStreamHeader {
-        /*
-         * FOURCC fcc; DWORD cb; FOURCC fccType; FOURCC fccHandler; DWORD
-         * dwFlags; WORD wPriority; WORD wLanguage; DWORD dwInitialFrames; DWORD
-         * dwScale; DWORD dwRate; DWORD dwStart; DWORD dwLength; DWORD
-         * dwSuggestedBufferSize; DWORD dwQuality; DWORD dwSampleSize; struct {
-         * short int left; short int top; short int right; short int bottom; }
-         * rcFrame;
-         */
-
+    
         public byte[] fcc = new byte[]{'s', 't', 'r', 'h'};
         public int cb = 64;
         public byte[] fccType = new byte[]{'v', 'i', 'd', 's'};
