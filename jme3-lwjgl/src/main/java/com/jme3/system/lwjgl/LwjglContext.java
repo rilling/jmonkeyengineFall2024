@@ -236,13 +236,13 @@ public abstract class LwjglContext implements JmeContext {
             return;
         }
         if (AppSettings.LWJGL_OPENAL.equals(settings.getAudioRenderer())) {
-            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.OpenAL.getName(), true);
+            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.OPEN_AL.getName(), true);
         }
         if (settings.useJoysticks()) {
-            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.JInput.getName(), true);
-            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.JInputDX8.getName(), true);
+            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.J_INPUT.getName(), true);
+            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.J_INPUT_DX_8.getName(), true);
         }
-        NativeLibraryLoader.loadNativeLibrary(NativeLibraries.Lwjgl.getName(), true);
+        NativeLibraryLoader.loadNativeLibrary(NativeLibraries.LWJGL.getName(), true);
     }
     protected int getNumSamplesToUse() {
         int samples = 0;

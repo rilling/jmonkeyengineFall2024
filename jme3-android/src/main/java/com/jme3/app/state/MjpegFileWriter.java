@@ -113,7 +113,6 @@ public class MjpegFileWriter {
                 aviOutput.write(0);
             }
         }
-        imagedata = null;
 
         numFrames++; //add a frame
     }

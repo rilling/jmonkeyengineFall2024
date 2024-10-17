@@ -120,7 +120,7 @@ public abstract class LwjglContextVR implements JmeContext {
         }
 
         if (NativeLibraryLoader.isUsingNativeBullet()) {
-            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.BulletJme.getName(), true);
+            NativeLibraryLoader.loadNativeLibrary(NativeLibraries.BULLET_JME.getName(), true);
         }
     }
 

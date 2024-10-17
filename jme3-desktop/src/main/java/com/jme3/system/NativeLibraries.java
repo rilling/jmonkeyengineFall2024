@@ -50,7 +50,7 @@ public enum NativeLibraries {
     /**
      * Native lwjgl libraries for LWJGL 2 required by jme3-lwjgl backend.
      */
-    Lwjgl(new LibraryInfo("lwjgl", libPath ->
+    LWJGL(new LibraryInfo("lwjgl", libPath ->
             // Delegate loading to lwjgl.
             System.setProperty("org.lwjgl.librarypath",
                     Paths.get(libPath).getParent().toAbsolutePath().toString()))
@@ -67,7 +67,7 @@ public enum NativeLibraries {
     /**
      * Native OpenAL audio libraries for LWJGL 2 required by jme3-lwjgl backend.
      */
-    OpenAL(new LibraryInfo("openal")
+    OPEN_AL(new LibraryInfo("openal")
             .addNativeVariant(Platform.Windows32, "OpenAL32.dll")
             .addNativeVariant(Platform.Windows64, "OpenAL64.dll")
             .addNativeVariant(Platform.Linux32,   "libopenal.so")
@@ -79,7 +79,7 @@ public enum NativeLibraries {
     /**
      * Native bullet physics libraries required by Minie library.
      */
-    BulletJme(new LibraryInfo("bulletjme")
+    BULLET_JME(new LibraryInfo("bulletjme")
             .addNativeVariant(Platform.Windows32, "native/windows/x86/bulletjme.dll", "bulletjme-x86.dll")
             .addNativeVariant(Platform.Windows64, "native/windows/x86_64/bulletjme.dll", "bulletjme-x86_64.dll")
             .addNativeVariant(Platform.Windows_ARM64, "native/windows/arm64/bulletjme.dll", "bulletjme-arm64.dll")
@@ -96,7 +96,7 @@ public enum NativeLibraries {
     /**
      * Native JInput joystick libraries required by jme3-lwjgl backend.
      */
-    JInput(new LibraryInfo("jinput", libPath ->
+    J_INPUT(new LibraryInfo("jinput", libPath ->
             // Delegate loading to jinput.
             System.setProperty("net.java.games.input.librarypath",
                     Paths.get(libPath).getParent().toAbsolutePath().toString()))
@@ -112,7 +112,7 @@ public enum NativeLibraries {
      * Native JInput DirectX 8 auxiliary libraries required by jme3-lwjgl backend.
      * (only required on Windows)
      */
-    JInputDX8(new LibraryInfo("jinput-dx8")
+    J_INPUT_DX_8(new LibraryInfo("jinput-dx8")
             .addNativeVariant(Platform.Windows32, "jinput-dx8.dll", null)
             .addNativeVariant(Platform.Windows64, "jinput-dx8_64.dll", null)
             .addNativeVariant(Platform.Linux32, null)
@@ -133,11 +133,11 @@ public enum NativeLibraries {
      * later on via {@link NativeLibraryLoader#loadNativeLibrary(String, boolean)}.
      */
     public static void registerDefaultLibraries() {
-        Lwjgl.registerLibrary();
-        OpenAL.registerLibrary();
-        BulletJme.registerLibrary();
-        JInput.registerLibrary();
-        JInputDX8.registerLibrary();
+        LWJGL.registerLibrary();
+        OPEN_AL.registerLibrary();
+        BULLET_JME.registerLibrary();
+        J_INPUT.registerLibrary();
+        J_INPUT_DX_8.registerLibrary();
     }
 
     public LibraryInfo getLibrary() {
