@@ -220,12 +220,6 @@ public class AndroidInputHandler implements View.OnTouchListener,
         int source = event.getSource();
 //        logger.log(Level.INFO, "onKey source: {0}", source);
 
-        boolean isTouch =
-                ((source & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN) ||
-                ((source & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
-//        logger.log(Level.INFO, "onKey source: {0}, isTouch: {1}",
-//                new Object[]{source, isTouch});
-
         if (touchInput != null) {
             consumed = touchInput.onKey(event);
         }
