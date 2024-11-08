@@ -133,47 +133,34 @@ public class AWTLoader implements AssetLoader {
                 break;
         }
 
-        if (img.getTransparency() == Transparency.OPAQUE){
-            ByteBuffer data = BufferUtils.createByteBuffer(img.getWidth()*img.getHeight()*3);
-            // no alpha
-            for (int y = 0; y < height; y++){
-                for (int x = 0; x < width; x++){
-                    int ny = y;
-                    if (flipY){
-                        ny = height - y - 1;
-                    }
+        int channels = (img.getTransparency() == Transparency.OPAQUE) ? 3 : 4;
+        ByteBuffer data = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * channels);
 
-                    int rgb = img.getRGB(x,ny);
-                    byte r = (byte) ((rgb & 0x00FF0000) >> 16);
-                    byte g = (byte) ((rgb & 0x0000FF00) >> 8);
-                    byte b = (byte) ((rgb & 0x000000FF));
-                    data.put(r).put(g).put(b);
-                }
-            }
-            data.flip();
-            return new Image(Format.RGB8, width, height, data, null, com.jme3.texture.image.ColorSpace.sRGB);
-        }else{
-            ByteBuffer data = BufferUtils.createByteBuffer(img.getWidth()*img.getHeight()*4);
-            // alpha
-            for (int y = 0; y < height; y++){
-                for (int x = 0; x < width; x++){
-                    int ny = y;
-                    if (flipY){
-                        ny = height - y - 1;
-                    }
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int ny = flipY ? height - y - 1 : y;
+                int rgb = img.getRGB(x, ny);
 
-                    int rgb = img.getRGB(x,ny);
+                // Extract RGB components
+                byte r = (byte) ((rgb & 0x00FF0000) >> 16);
+                byte g = (byte) ((rgb & 0x0000FF00) >> 8);
+                byte b = (byte) (rgb & 0x000000FF);
+                data.put(r).put(g).put(b);
+
+                // If there is alpha, include it
+                if (channels == 4) {
                     byte a = (byte) ((rgb & 0xFF000000) >> 24);
-                    byte r = (byte) ((rgb & 0x00FF0000) >> 16);
-                    byte g = (byte) ((rgb & 0x0000FF00) >> 8);
-                    byte b = (byte) ((rgb & 0x000000FF));
-                    data.put(r).put(g).put(b).put(a);
+                    data.put(a);
                 }
             }
-            data.flip();
-            return new Image(Format.RGBA8, width, height, data, null, com.jme3.texture.image.ColorSpace.sRGB);
         }
+        data.flip();
+
+        // Return image based on the channel count
+        Format format = (channels == 3) ? Format.RGB8 : Format.RGBA8;
+        return new Image(format, width, height, data, null, com.jme3.texture.image.ColorSpace.sRGB);
     }
+
 
     public Image load(InputStream in, boolean flipY) throws IOException{
         ImageIO.setUseCache(false);
