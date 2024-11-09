@@ -184,21 +184,14 @@ public class AndroidInputHandler implements View.OnTouchListener,
      *
      */
 
-
-    @Override
-    public boolean onTouch(View view, MotionEvent event) {
+    protected boolean processTouchEvent(View view, MotionEvent event) {
         if (view != getView()) {
             return false;
         }
 
         boolean consumed = false;
-
         int source = event.getSource();
-//        logger.log(Level.INFO, "onTouch source: {0}", source);
-
         boolean isTouch = ((source & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN);
-//        logger.log(Level.INFO, "onTouch source: {0}, isTouch: {1}",
-//                new Object[]{source, isTouch});
 
         if (isTouch && touchInput != null) {
             // send the event to the touch processor
@@ -206,7 +199,11 @@ public class AndroidInputHandler implements View.OnTouchListener,
         }
 
         return consumed;
+    }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent event) {
+        return processTouchEvent(view, event);
     }
 
     @Override
