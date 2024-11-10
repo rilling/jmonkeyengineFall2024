@@ -98,9 +98,9 @@ public class NativeVorbisLoader implements AssetLoader {
         AssetFileDescriptor afd = null;
         NativeVorbisFile file = null;
         try {
-            afd = aai.openFileDescriptor();
-            int fd = afd.getParcelFileDescriptor().getFd();
-            file = new NativeVorbisFile(fd, afd.getStartOffset(), afd.getLength());
+            afd = openFileDescriptor(aai);
+            file = createNativeVorbisFile(afd);
+
             ByteBuffer data = BufferUtils.createByteBuffer(file.totalBytes);
             file.readIntoBuffer(data);
             AudioBuffer ab = new AudioBuffer();
@@ -108,12 +108,7 @@ public class NativeVorbisLoader implements AssetLoader {
             ab.updateData(data);
             return ab;
         } finally {
-            if (file != null) {
-                file.clearResources();
-            }
-            if (afd != null) {
-                afd.close();
-            }
+            closeResources(afd, file);
         }
     }
     
@@ -124,25 +119,43 @@ public class NativeVorbisLoader implements AssetLoader {
         boolean success = false;
         
         try {
-            afd = aai.openFileDescriptor();
-            int fd = afd.getParcelFileDescriptor().getFd();
-            file = new NativeVorbisFile(fd, afd.getStartOffset(), afd.getLength());
-            
+            afd = openFileDescriptor(aai);
+            file = createNativeVorbisFile(afd);
+
             AudioStream stream = new AudioStream();
             stream.setupFormat(file.channels, 16, file.sampleRate);
             stream.updateData(new VorbisInputStream(afd, file), file.duration);
             
             success = true;
-            
             return stream;
         } finally {
             if (!success) {
-                if (file != null) {
-                    file.clearResources();
-                }
-                if (afd != null) {
-                    afd.close();
-                }
+                closeResources(afd, file);
+            }
+        }
+    }
+
+    // Helper method to open file descriptor
+    private static AssetFileDescriptor openFileDescriptor(AndroidAssetInfo aai) throws IOException {
+        return aai.openFileDescriptor();
+    }
+
+    // Helper method to create a NativeVorbisFile
+    private static NativeVorbisFile createNativeVorbisFile(AssetFileDescriptor afd) throws IOException {
+        int fd = afd.getParcelFileDescriptor().getFd();
+        return new NativeVorbisFile(fd, afd.getStartOffset(), afd.getLength());
+    }
+
+    // Helper method to close resources
+    private static void closeResources(AssetFileDescriptor afd, NativeVorbisFile file) {
+        if (file != null) {
+            file.clearResources();
+        }
+        if (afd != null) {
+            try {
+                afd.close();
+            } catch (IOException e) {
+                e.printStackTrace(); // handle or log exception appropriately
             }
         }
     }
