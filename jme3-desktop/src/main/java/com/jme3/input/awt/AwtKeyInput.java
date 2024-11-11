@@ -117,34 +117,30 @@ public class AwtKeyInput implements KeyInput, KeyListener {
         // key code is zero for typed events
     }
 
-    @Override
-    public void keyPressed(KeyEvent evt) {
+    private void keyPressedReleased(KeyEvent evt, boolean pressed){
         int code = convertAwtKey(evt.getKeyCode());
-        
-        // Check if key was already pressed
+
         if (!keyStateSet.get(code)){
             keyStateSet.set(code);
-            KeyInputEvent keyEvent = new KeyInputEvent(code, evt.getKeyChar(), true, false);
+            KeyInputEvent keyEvent = new KeyInputEvent(code, evt.getKeyChar(), pressed, false);
             keyEvent.setTime(evt.getWhen());
             synchronized (eventQueue){
                 eventQueue.add(keyEvent);
-            }            
+            }
         }
     }
 
     @Override
+    public void keyPressed(KeyEvent evt) {
+
+        // Check if key was already pressed
+        keyPressedReleased(evt, true);
+    }
+
+    @Override
     public void keyReleased(KeyEvent evt) {
-        int code = convertAwtKey(evt.getKeyCode());
-        
-        // Check if key was already released
-        if (keyStateSet.get(code)) {
-            keyStateSet.clear(code);
-            KeyInputEvent keyEvent = new KeyInputEvent(code, evt.getKeyChar(), false, false);
-            keyEvent.setTime(evt.getWhen());
-            synchronized (eventQueue){
-                eventQueue.add(keyEvent);
-            }                        
-        }
+        // Check if key was already pressed
+        keyPressedReleased(evt, false);
     }
 
     /**
