@@ -609,27 +609,34 @@ public class AndroidHarnessFragment extends Fragment implements
         if (view != null) {
             view.onResume();
         }
-
+    
         if (app != null) {
-            //resume the audio
-            AudioRenderer audioRenderer = app.getAudioRenderer();
-            if (audioRenderer != null) {
+            controlAudio(true); // Resume audio
+            controlSensors(true); // Resume sensors
+            app.gainFocus();
+        }
+    }
+    private void controlAudio(boolean resume) {
+        AudioRenderer audioRenderer = app.getAudioRenderer();
+        if (audioRenderer != null) {
+            if (resume) {
                 audioRenderer.resumeAll();
-            }
-            //resume the sensors (aka joysticks)
-            if (app.getContext() != null) {
-                JoyInput joyInput = app.getContext().getJoyInput();
-                if (joyInput != null) {
-                    if (joyInput instanceof AndroidSensorJoyInput) {
-                        AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
-                        androidJoyInput.resumeSensors();
-                    }
-                }
+            } else {
+                audioRenderer.pauseAll();
             }
         }
-
-        if (app != null) {
-            app.gainFocus();
+    }
+    private void controlSensors(boolean resume) {
+        if (app.getContext() != null) {
+            JoyInput joyInput = app.getContext().getJoyInput();
+            if (joyInput instanceof AndroidSensorJoyInput) {
+                AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
+                if (resume) {
+                    androidJoyInput.resumeSensors();
+                } else {
+                    androidJoyInput.pauseSensors();
+                }
+            }
         }
     }
 
@@ -639,31 +646,17 @@ public class AndroidHarnessFragment extends Fragment implements
         if (app != null) {
             app.loseFocus();
         }
-
+    
         if (view != null) {
             view.onPause();
         }
-
+    
         if (app != null) {
-            //pause the audio
-            AudioRenderer audioRenderer = app.getAudioRenderer();
-            if (audioRenderer != null) {
-                audioRenderer.pauseAll();
-            }
-            //pause the sensors (aka joysticks)
-            if (app.getContext() != null) {
-                JoyInput joyInput = app.getContext().getJoyInput();
-                if (joyInput != null) {
-                    if (joyInput instanceof AndroidSensorJoyInput) {
-                        AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
-                        androidJoyInput.pauseSensors();
-                    }
-                }
-            }
+            controlAudio(false); // Pause audio
+            controlSensors(false); // Pause sensors
         }
-
     }
-
+    
     @Override
     public void onLayoutChange(View v,
             int left, int top, int right, int bottom,
