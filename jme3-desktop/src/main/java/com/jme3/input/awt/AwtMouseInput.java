@@ -234,11 +234,10 @@ public class AwtMouseInput implements MouseInput, MouseListener, MouseWheelListe
 //        listener.onMouseButtonEvent(evt);
     }
 
-    @Override
-    public void mousePressed(MouseEvent awtEvt) {
-        // Must flip Y!
+    // New helper method to handle mouse button events
+    private void handleMouseButtonEvent(MouseEvent awtEvt, boolean isPressed) {
         int y = component.getHeight() - awtEvt.getY();
-        MouseButtonEvent evt = new MouseButtonEvent(getJMEButtonIndex(awtEvt), true, awtEvt.getX(), y);
+        MouseButtonEvent evt = new MouseButtonEvent(getJMEButtonIndex(awtEvt), isPressed, awtEvt.getX(), y);
         evt.setTime(awtEvt.getWhen());
         synchronized (eventQueue) {
             eventQueue.add(evt);
@@ -246,13 +245,13 @@ public class AwtMouseInput implements MouseInput, MouseListener, MouseWheelListe
     }
 
     @Override
+    public void mousePressed(MouseEvent awtEvt) {
+        handleMouseButtonEvent(awtEvt, true);
+    }
+
+    @Override
     public void mouseReleased(MouseEvent awtEvt) {
-        int y = component.getHeight() - awtEvt.getY();
-        MouseButtonEvent evt = new MouseButtonEvent(getJMEButtonIndex(awtEvt), false, awtEvt.getX(), y);
-        evt.setTime(awtEvt.getWhen());
-        synchronized (eventQueue) {
-            eventQueue.add(evt);
-        }
+        handleMouseButtonEvent(awtEvt, false);
     }
 
     @Override
