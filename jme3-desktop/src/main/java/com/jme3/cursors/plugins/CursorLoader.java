@@ -107,7 +107,6 @@ public class CursorLoader implements AssetLoader {
             int steps = 0;
             int width = 0;
             int height = 0;
-            int flag = 0; // we don't use that.
             int[] rate = null;
             int[] animSeq = null;
             ArrayList<byte[]> icons;
@@ -134,7 +133,6 @@ public class CursorLoader implements AssetLoader {
                             height = leIn.readInt();
                             leIn.skipBytes(8);
                             jiffy = leIn.readInt();
-                            flag = leIn.readInt();
                             nextInt = leIn.readInt();
                         } else if (nextInt == 0x65746172) { // found a 'rate' of animation
 //                            System.out.println("we have 'rate'.");
@@ -273,6 +271,7 @@ public class CursorLoader implements AssetLoader {
 
         BufferedImage[] bi;
         // Check resource type field.
+
         int deLength = 16; // directory entry length
         int bmihLength = 40; // BITMAPINFOHEADER length
 
