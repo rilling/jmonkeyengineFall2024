@@ -212,7 +212,7 @@ public class AndroidSensorJoyInput implements SensorEventListener {
      */
     public void resumeSensors() {
         for (Entry entry: sensors) {
-            if (entry.getKey() != Sensor.TYPE_ORIENTATION) {
+            if (entry.getKey() != Sensor.TYPE_ROTATION_VECTOR) {
                 registerListener(entry.getKey());
             }
         }
