@@ -170,11 +170,7 @@ public class AndroidGestureProcessor implements
         // DoubleTapEvent with a check for the UP action
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
-        TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(TouchEvent.Type.DOUBLETAP, jmeX, jmeY, 0, 0);
-        touchEvent.setPointerId(touchInput.getPointerId(event));
-        touchEvent.setTime(event.getEventTime());
-        touchEvent.setPressure(event.getPressure());
+        TouchEvent touchEvent = generateDoubleTapTouchEvent(event, jmeX, jmeY);
         touchInput.addEvent(touchEvent);
         return true;
     }
@@ -184,11 +180,7 @@ public class AndroidGestureProcessor implements
         //Notified when an event within a double-tap gesture occurs, including the down, move(s), and up events.
         // this means it will get called multiple times for a single double tap
         if (touchInput.getAction(event) == MotionEvent.ACTION_UP) {
-            TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-            touchEvent.set(TouchEvent.Type.DOUBLETAP, event.getX(), touchInput.invertY(event.getY()), 0, 0);
-            touchEvent.setPointerId(touchInput.getPointerId(event));
-            touchEvent.setTime(event.getEventTime());
-            touchEvent.setPressure(event.getPressure());
+            TouchEvent touchEvent = generateDoubleTapTouchEvent(event, event.getX(), touchInput.invertY(event.getY()));
             touchInput.addEvent(touchEvent);
         }
         return true;
@@ -237,5 +229,14 @@ public class AndroidGestureProcessor implements
         scaleStartY = gestureDownY;
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
         setTouchEvent(touchEvent, TouchEvent.Type.SCALE_END, scaleGestureDetector, scaleGestureDetector.getCurrentSpan() - scaleGestureDetector.getPreviousSpan());
+    }
+
+    public TouchEvent generateDoubleTapTouchEvent(MotionEvent event, float jmeX, float jmeY) {
+        TouchEvent touchEvent = touchInput.getFreeTouchEvent();
+        touchEvent.set(TouchEvent.Type.DOUBLETAP, jmeX, jmeY, 0, 0);
+        touchEvent.setPointerId(touchInput.getPointerId(event));
+        touchEvent.setTime(event.getEventTime());
+        touchEvent.setPressure(event.getPressure());
+        return touchEvent;
     }
 }
