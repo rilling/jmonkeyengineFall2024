@@ -154,26 +154,30 @@ public class AndroidGestureProcessor implements
         // Up of single tap when no double tap followed.
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
-        TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(TouchEvent.Type.TAP, jmeX, jmeY, 0, 0);
-        touchEvent.setPointerId(touchInput.getPointerId(event));
-        touchEvent.setTime(event.getEventTime());
-        touchEvent.setPressure(event.getPressure());
+        TouchEvent touchEvent = generateTouchEvent(event, TouchEvent.Type.TAP, jmeX, jmeY);
         touchInput.addEvent(touchEvent);
         return true;
     }
 
     @Override
     public boolean onDoubleTap(MotionEvent event) {
-        //The down motion event of the first tap of the double-tap
-        // We could use this event to fire off a double tap event, or use
-        // DoubleTapEvent with a check for the UP action
+        // The down motion event of the first tap of the double-tap
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
-        TouchEvent touchEvent = generateDoubleTapTouchEvent(event, jmeX, jmeY);
+        TouchEvent touchEvent = generateTouchEvent(event, TouchEvent.Type.DOUBLETAP, jmeX, jmeY);
         touchInput.addEvent(touchEvent);
         return true;
     }
+
+    private TouchEvent generateTouchEvent(MotionEvent event, TouchEvent.Type eventType, float jmeX, float jmeY) {
+        TouchEvent touchEvent = touchInput.getFreeTouchEvent();
+        touchEvent.set(eventType, jmeX, jmeY, 0, 0);
+        touchEvent.setPointerId(touchInput.getPointerId(event));
+        touchEvent.setTime(event.getEventTime());
+        touchEvent.setPressure(event.getPressure());
+        return touchEvent;
+    }
+
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent event) {
