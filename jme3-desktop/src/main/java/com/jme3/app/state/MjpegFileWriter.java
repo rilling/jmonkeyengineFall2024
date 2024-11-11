@@ -82,15 +82,8 @@ public class MjpegFileWriter implements AutoCloseable {
         this.numFrames = numFrames;
         FileOutputStream fos = new FileOutputStream(aviFile);
         aviOutput = new BufferedOutputStream(fos);
-
-        RIFFHeader rh = new RIFFHeader();
         ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-        baos.write(rh.toBytes());
-        baos.write(new AVIMainHeader().toBytes());
-        baos.write(new AVIStreamList().toBytes());
-        baos.write(new AVIStreamHeader().toBytes());
-        baos.write(new AVIStreamFormat().toBytes());
-        baos.write(new AVIJunk().toBytes());
+        writeHeadersToStream(baos, 0, false);
         byte[] headerBytes = baos.toByteArray();
         aviOutput.write(headerBytes);
         aviMovieOffset = headerBytes.length;
@@ -147,16 +140,19 @@ public class MjpegFileWriter implements AutoCloseable {
         //with the now available information
         try (SeekableByteChannel sbc = Files.newByteChannel(aviFile.toPath(), StandardOpenOption.WRITE);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            baos.write(new RIFFHeader(fileSize).toBytes());
-            baos.write(new AVIMainHeader().toBytes());
-            baos.write(new AVIStreamList().toBytes());
-            baos.write(new AVIStreamHeader().toBytes());
-            baos.write(new AVIStreamFormat().toBytes());
-            baos.write(new AVIJunk().toBytes());
+            writeHeadersToStream(baos, fileSize, true);
             baos.write(new AVIMovieList(listSize).toBytes());
-
             sbc.write(ByteBuffer.wrap(baos.toByteArray()));
         }
+    }
+
+    private void writeHeadersToStream(ByteArrayOutputStream baos, int fileSize, boolean useFileSize) throws IOException {
+        baos.write((useFileSize ? new RIFFHeader(fileSize) : new RIFFHeader()).toBytes());
+        baos.write(new AVIMainHeader().toBytes());
+        baos.write(new AVIStreamList().toBytes());
+        baos.write(new AVIStreamHeader().toBytes());
+        baos.write(new AVIStreamFormat().toBytes());
+        baos.write(new AVIJunk().toBytes());
     }
 
     // public void writeAVI(File file) throws Exception
