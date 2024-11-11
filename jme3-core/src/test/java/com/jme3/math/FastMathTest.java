@@ -36,8 +36,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
 
-import java.lang.Math;
-
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 

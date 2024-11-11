@@ -54,7 +54,7 @@ import javax.swing.SwingUtilities;
  */
 public class AwtMouseInput implements MouseInput, MouseListener, MouseWheelListener, MouseMotionListener {
 
-    public static int WHEEL_AMP = 40;   // arbitrary...  Java's mouse wheel seems to report something a lot lower than lwjgl's
+    public static final int WHEEL_AMP = 40;   // arbitrary...  Java's mouse wheel seems to report something a lot lower than lwjgl's
 
     private static final Logger logger = Logger.getLogger(AwtMouseInput.class.getName());
 
