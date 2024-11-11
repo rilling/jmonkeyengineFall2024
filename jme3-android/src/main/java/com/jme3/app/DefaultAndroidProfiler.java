@@ -35,7 +35,7 @@ package com.jme3.app;
 import android.os.Build;
 import com.jme3.profile.*;
 
-import static com.jme3.profile.AppStep.BeginFrame;
+
 import static com.jme3.profile.AppStep.EndFrame;
 import static com.jme3.profile.AppStep.ProcessAudio;
 import static com.jme3.profile.AppStep.ProcessInput;
