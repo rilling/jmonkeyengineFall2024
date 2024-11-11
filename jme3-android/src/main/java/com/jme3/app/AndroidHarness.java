@@ -31,6 +31,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import android.graphics.Point;
 
 /**
  * <code>AndroidHarness</code> wraps a jme application object and runs it on
@@ -172,7 +173,10 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
     protected boolean isGLThreadPaused = true;
     protected ImageView splashImageView = null;
     protected FrameLayout frameLayout = null;
-    final private String escapeEvent = "TouchEscape";
+
+
+    static final private String escapeEvent = "TouchEscape";
+
     private boolean firstDrawFrame = true;
     private boolean inConfigChange = false;
 
@@ -200,7 +204,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
         if (screenFullScreen) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
             if (!screenShowTitle) {
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -216,7 +220,11 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             //TODO try to find a better way to get a hand on the resolution
             WindowManager wind = this.getWindowManager();
             Display disp = wind.getDefaultDisplay();
-            Log.d("AndroidHarness", "Resolution from Window, width:" + disp.getWidth() + ", height: " + disp.getHeight());
+            Point size = new Point();
+            disp.getSize(size);  // Replaces the deprecated methods
+            int width = size.x;
+            int height = size.y;
+            Log.d("AndroidHarness", "Resolution from Window, width:" + width + ", height: " + height);
 
             // Create Settings
             logger.log(Level.FINE, "Creating settings");
@@ -232,7 +240,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             settings.setSamples(eglSamples);
             settings.setStencilBits(eglStencilBits);
 
-            settings.setResolution(disp.getWidth(), disp.getHeight());
+            settings.setResolution(width, height);
             settings.setAudioRenderer(audioRendererType);
 
             settings.setFrameRate(frameRate);
@@ -345,13 +353,10 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
 
         logger.log(Level.SEVERE, finalMsg);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog dialog = new AlertDialog.Builder(AndroidHarness.this) // .setIcon(R.drawable.alert_dialog_icon)
-                        .setTitle(finalTitle).setPositiveButton("Kill", AndroidHarness.this).setMessage(finalMsg).create();
-                dialog.show();
-            }
+        runOnUiThread(() -> {
+            AlertDialog dialog = new AlertDialog.Builder(AndroidHarness.this) // .setIcon(R.drawable.alert_dialog_icon)
+                    .setTitle(finalTitle).setPositiveButton("Kill", AndroidHarness.this).setMessage(finalMsg).create();
+            dialog.show();
         });
     }
 
@@ -412,7 +417,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
 
             Drawable drawable = this.getResources().getDrawable(splashPicID);
             if (drawable instanceof NinePatchDrawable) {
-                splashImageView.setBackgroundDrawable(drawable);
+                splashImageView.setBackground(drawable);
             } else {
                 splashImageView.setImageResource(splashPicID);
             }
@@ -543,11 +548,9 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
             //resume the sensors (aka joysticks)
             if (app.getContext() != null) {
                 JoyInput joyInput = app.getContext().getJoyInput();
-                if (joyInput != null) {
-                    if (joyInput instanceof AndroidSensorJoyInput) {
-                        AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
-                        androidJoyInput.resumeSensors();
-                    }
+                if (joyInput instanceof AndroidSensorJoyInput) {
+                    AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
+                    androidJoyInput.resumeSensors();
                 }
             }
         }

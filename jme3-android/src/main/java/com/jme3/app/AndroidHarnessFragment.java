@@ -204,7 +204,7 @@ public class AndroidHarnessFragment extends Fragment implements
     protected FrameLayout frameLayout = null;
     protected GLSurfaceView view = null;
     protected ImageView splashImageView = null;
-    final private String ESCAPE_EVENT = "TouchEscape";
+    static final private String ESCAPEEVENT = "TouchEscape";
     private boolean firstDrawFrame = true;
     private LegacyApplication app = null;
     private int viewWidth = 0;
@@ -450,7 +450,7 @@ public class AndroidHarnessFragment extends Fragment implements
      */
     @Override
     public void onTouch(String name, TouchEvent evt, float tpf) {
-        if (name.equals(ESCAPE_EVENT)) {
+        if (name.equals(ESCAPEEVENT)) {
             switch (evt.getType()) {
                 case KEY_UP:
                     getActivity().runOnUiThread(new Runnable() {
@@ -561,8 +561,8 @@ public class AndroidHarnessFragment extends Fragment implements
                 app.getInputManager().deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
             }
 
-            app.getInputManager().addMapping(ESCAPE_EVENT, new TouchTrigger(TouchInput.KEYCODE_BACK));
-            app.getInputManager().addListener(this, new String[]{ESCAPE_EVENT});
+            app.getInputManager().addMapping(ESCAPEEVENT, new TouchTrigger(TouchInput.KEYCODE_BACK));
+            app.getInputManager().addListener(this, new String[]{ESCAPEEVENT});
         }
     }
 

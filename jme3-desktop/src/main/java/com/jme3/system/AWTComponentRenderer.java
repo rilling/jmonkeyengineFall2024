@@ -227,7 +227,6 @@ public class AWTComponentRenderer {
       } else {
         System.out.println("AWT component "+destination.getClass().getSimpleName()+" does not provide 2D graphics capabilities.");
         return null;
-        //throw new IllegalArgumentException("AWT component "+destination.getClass().getSimpleName()+" does not provide 2D graphics capabilities.");
       }
     } else {
       throw new IllegalArgumentException("destination component cannot be null");
@@ -297,12 +296,7 @@ public class AWTComponentRenderer {
       }
     }
 
-    EventQueue.invokeLater(new Runnable() {
-
-      @Override
-      public void run() {
-        writeFrame();
-      }});
+    EventQueue.invokeLater(() -> writeFrame());
   }
 
   /**
@@ -328,7 +322,9 @@ public class AWTComponentRenderer {
             imageDataBuffer[i] =   ((0xff & byteBuffer[i*4+3]) << 24)  // Alpha 
                                  | ((0xff & byteBuffer[i*4])   << 16)  // Red
                                  | ((0xff & byteBuffer[i*4+1]) <<  8)  // Green 
-                                 | ((0xff & byteBuffer[i*4+2]));       // BLue
+
+                                 | (0xff & byteBuffer[i*4+2]);         // BLue
+
             
           }
         }
