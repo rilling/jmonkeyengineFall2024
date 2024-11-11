@@ -113,7 +113,6 @@ public class MjpegFileWriter {
                 aviOutput.write(0);
             }
         }
-        imagedata = null;
 
         numFrames++; //add a frame
     }
@@ -148,17 +147,6 @@ public class MjpegFileWriter {
         raf.close();
     }
 
-    // public void writeAVI(File file) throws Exception
-    // {
-    // OutputStream os = new FileOutputStream(file);
-    //
-    // // RIFFHeader
-    // // AVIMainHeader
-    // // AVIStreamList
-    // // AVIStreamHeader
-    // // AVIStreamFormat
-    // // write 00db and image bytes...
-    // }
     public static int swapInt(int v) {
         return (v >>> 24) | (v << 24) | ((v << 8) & 0x00FF0000) | ((v >> 8) & 0x0000FF00);
     }
@@ -376,12 +364,6 @@ public class MjpegFileWriter {
     }
 
     private class AVIStreamFormat {
-        /*
-         * FOURCC fcc; DWORD cb; DWORD biSize; LONG biWidth; LONG biHeight; WORD
-         * biPlanes; WORD biBitCount; DWORD biCompression; DWORD biSizeImage;
-         * LONG biXPelsPerMeter; LONG biYPelsPerMeter; DWORD biClrUsed; DWORD
-         * biClrImportant;
-         */
 
         public byte[] fcc = new byte[]{'s', 't', 'r', 'f'};
         public int cb = 40;
