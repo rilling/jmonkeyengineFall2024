@@ -55,7 +55,7 @@ import javax.imageio.stream.ImageOutputStream;
 
 /**
  * Released under BSD License
- * 
+ *
  * @author monceaux, normenhansen, entrusC
  */
 public class MjpegFileWriter implements AutoCloseable {
@@ -70,6 +70,10 @@ public class MjpegFileWriter implements AutoCloseable {
     long aviMovieOffset = 0;
     long position = 0;
     AVIIndexList indexlist = null;
+    private byte[] fcc;
+    private int size;
+    private byte[] fcc2;
+    private byte[] data;
 
     public MjpegFileWriter(File aviFile, int width, int height, double framerate) throws Exception {
         this(aviFile, width, height, framerate, 0);
@@ -156,6 +160,14 @@ public class MjpegFileWriter implements AutoCloseable {
         baos.write(new AVIStreamHeader().toBytes());
         baos.write(new AVIStreamFormat().toBytes());
         baos.write(new AVIJunk().toBytes());
+    }
+
+    private byte[] toBytesInternal(byte[] content) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(fcc);
+        baos.write(intBytes(swapInt(size)));
+        baos.write(content);
+        return baos.toByteArray();
     }
 
     // public void writeAVI(File file) throws Exception
@@ -306,12 +318,7 @@ public class MjpegFileWriter implements AutoCloseable {
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(size)));
-            baos.write(fcc2);
-
-            return baos.toByteArray();
+            return toBytesInternal(fcc2);
         }
     }
 
@@ -505,13 +512,7 @@ public class MjpegFileWriter implements AutoCloseable {
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(dwFlags)));
-            baos.write(intBytes(swapInt(dwOffset)));
-            baos.write(intBytes(swapInt(dwSize)));
-
-            return baos.toByteArray();
+            return toBytesInternal(data);
         }
     }
 
