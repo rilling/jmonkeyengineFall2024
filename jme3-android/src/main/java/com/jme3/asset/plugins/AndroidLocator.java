@@ -99,46 +99,44 @@ public class AndroidLocator implements AssetLocator {
             this.resourceId = resourceId;
         }
 
+        private android.content.res.Resources getAndroidResources() {
+            return JmeAndroidSystem.getView().getContext().getResources();
+        }
+
+        private InputStream getResourceAsStream(String assetPath, int resourceId) throws AssetLoadException {
+            android.content.res.Resources androidResources = getAndroidResources();
+            try {
+                if (resourceId == 0) {
+                    return androidResources.getAssets().open(assetPath);
+                } else {
+                    return androidResources.openRawResource(resourceId);
+                }
+            } catch (IOException | Resources.NotFoundException ex) {
+                throw new AssetLoadException("Failed to open asset " + assetPath, ex);
+            }
+        }
+
         @Override
         public InputStream openStream() {
-            if (in != null){
-                // Reuse the already existing stream (only once)
+            if (in != null) {
                 InputStream in2 = in;
                 in = null;
                 return in2;
-            }else{
-                // Create a new stream for subsequent invocations.
-                android.content.res.Resources androidResources = JmeAndroidSystem.getView().getContext().getResources();
-                if (resourceId == 0) {
-                    try {
-                        return androidResources.getAssets().open(assetPath);
-                    } catch (IOException ex) {
-                        throw new AssetLoadException("Failed to open asset " + assetPath, ex);
-                    }
-                } else {
-                    try {
-                        return androidResources.openRawResource(resourceId);
-                    } catch (Resources.NotFoundException ex) {
-                        throw new AssetLoadException("Failed to open asset " + assetPath, ex);
-                    }
-                }
+            } else {
+                return getResourceAsStream(assetPath, resourceId);
             }
         }
 
         public AssetFileDescriptor openFileDescriptor() {
-            android.content.res.Resources androidResources = JmeAndroidSystem.getView().getContext().getResources();
-            if (resourceId == 0) {
-                try {
+            android.content.res.Resources androidResources = getAndroidResources();
+            try {
+                if (resourceId == 0) {
                     return androidResources.getAssets().openFd(assetPath);
-                } catch (IOException ex) {
-                    throw new AssetLoadException("Failed to open asset " + assetPath, ex);
-                }
-            } else {
-                try {
+                } else {
                     return androidResources.openRawResourceFd(resourceId);
-                } catch (Resources.NotFoundException ex) {
-                    throw new AssetLoadException("Failed to open asset " + assetPath, ex);
                 }
+            } catch (IOException | Resources.NotFoundException ex) {
+                throw new AssetLoadException("Failed to open asset " + assetPath, ex);
             }
         }
     }
