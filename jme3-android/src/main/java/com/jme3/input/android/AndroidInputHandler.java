@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * @author iwgeric
  */
 public class AndroidInputHandler implements View.OnTouchListener,
-                                            View.OnKeyListener {
+        View.OnKeyListener {
 
     private static final Logger logger = Logger.getLogger(AndroidInputHandler.class.getName());
 
@@ -184,21 +184,14 @@ public class AndroidInputHandler implements View.OnTouchListener,
      *
      */
 
-
-    @Override
-    public boolean onTouch(View view, MotionEvent event) {
+    protected boolean processTouchEvent(View view, MotionEvent event) {
         if (view != getView()) {
             return false;
         }
 
         boolean consumed = false;
-
         int source = event.getSource();
-//        logger.log(Level.INFO, "onTouch source: {0}", source);
-
         boolean isTouch = ((source & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN);
-//        logger.log(Level.INFO, "onTouch source: {0}, isTouch: {1}",
-//                new Object[]{source, isTouch});
 
         if (isTouch && touchInput != null) {
             // send the event to the touch processor
@@ -206,7 +199,36 @@ public class AndroidInputHandler implements View.OnTouchListener,
         }
 
         return consumed;
+    }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent event) {
+        return processTouchEvent(view, event);
+    }
+    protected boolean consumeEvent(KeyEvent event, Object touchInput, Object joyInput) {
+        int source = event.getSource();
+
+        boolean isTouch = ((source & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN) ||
+                ((source & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
+
+        boolean isJoystick = ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) ||
+                ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+
+        boolean isUnknown = (source & InputDevice.SOURCE_UNKNOWN) == InputDevice.SOURCE_UNKNOWN;
+
+        boolean consumed = false;
+
+        // Check if touchInput should consume the event
+        if (touchInput != null && (isTouch || (isUnknown && ((TouchInput)touchInput).isSimulateKeyboard()))) {
+            consumed = true;
+        }
+
+        // Check if joyInput should consume the event
+        if (isJoystick && joyInput != null) {
+            consumed |= ((AndroidJoyInput14)joyInput).onKey(event);
+        }
+
+        return consumed;
     }
 
     @Override
@@ -214,18 +236,7 @@ public class AndroidInputHandler implements View.OnTouchListener,
         if (view != getView()) {
             return false;
         }
-
-        boolean consumed = false;
-
-        int source = event.getSource();
-//        logger.log(Level.INFO, "onKey source: {0}", source);
-
-        if (touchInput != null) {
-            consumed = touchInput.onKey(event);
-        }
-
-        return consumed;
-
+        return consumeEvent(event, touchInput, null);
     }
 
 }
