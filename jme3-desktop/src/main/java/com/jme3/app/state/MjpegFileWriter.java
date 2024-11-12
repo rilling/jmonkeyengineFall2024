@@ -74,6 +74,16 @@ public class MjpegFileWriter implements AutoCloseable {
         this(aviFile, width, height, framerate, 0);
     }
 
+    private void writeHeaderData(ByteArrayOutputStream baos, RIFFHeader rh) throws IOException {
+        baos.write(rh.toBytes());
+        baos.write(new AVIMainHeader().toBytes());
+        baos.write(new AVIStreamList().toBytes());
+        baos.write(new AVIStreamHeader().toBytes());
+        baos.write(new AVIStreamFormat().toBytes());
+        baos.write(new AVIJunk().toBytes());
+    }
+
+
     public MjpegFileWriter(File aviFile, int width, int height, double framerate, int numFrames) throws IOException {
         this.aviFile = aviFile;
         this.width = width;
@@ -85,12 +95,8 @@ public class MjpegFileWriter implements AutoCloseable {
 
         RIFFHeader rh = new RIFFHeader();
         ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-        baos.write(rh.toBytes());
-        baos.write(new AVIMainHeader().toBytes());
-        baos.write(new AVIStreamList().toBytes());
-        baos.write(new AVIStreamHeader().toBytes());
-        baos.write(new AVIStreamFormat().toBytes());
-        baos.write(new AVIJunk().toBytes());
+        // Use the helper method to write the headers
+        writeHeaderData(baos, rh);
         byte[] headerBytes = baos.toByteArray();
         aviOutput.write(headerBytes);
         aviMovieOffset = headerBytes.length;
@@ -134,6 +140,17 @@ public class MjpegFileWriter implements AutoCloseable {
         position += data.length;
     }
 
+    private void writeFinishAVIHeaders(ByteArrayOutputStream baos, int fileSize, int listSize) throws IOException {
+        baos.write(new RIFFHeader(fileSize).toBytes());
+        baos.write(new AVIMainHeader().toBytes());
+        baos.write(new AVIStreamList().toBytes());
+        baos.write(new AVIStreamHeader().toBytes());
+        baos.write(new AVIStreamFormat().toBytes());
+        baos.write(new AVIJunk().toBytes());
+        baos.write(new AVIMovieList(listSize).toBytes());
+    }
+
+
     public void finishAVI() throws IOException {
         byte[] indexlistBytes = indexlist.toBytes();
         aviOutput.write(indexlistBytes);
@@ -141,17 +158,10 @@ public class MjpegFileWriter implements AutoCloseable {
         int fileSize = (int) aviFile.length();
         int listSize = (int) (fileSize - 8 - aviMovieOffset - indexlistBytes.length);
 
-        //add header and length by writing the headers again
-        //with the now available information
+        // Use the helper method to write the headers
         try (SeekableByteChannel sbc = Files.newByteChannel(aviFile.toPath(), StandardOpenOption.WRITE);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            baos.write(new RIFFHeader(fileSize).toBytes());
-            baos.write(new AVIMainHeader().toBytes());
-            baos.write(new AVIStreamList().toBytes());
-            baos.write(new AVIStreamHeader().toBytes());
-            baos.write(new AVIStreamFormat().toBytes());
-            baos.write(new AVIJunk().toBytes());
-            baos.write(new AVIMovieList(listSize).toBytes());
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            writeFinishAVIHeaders(baos, fileSize, listSize);
 
             sbc.write(ByteBuffer.wrap(baos.toByteArray()));
         }
