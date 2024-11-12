@@ -75,7 +75,9 @@ import java.util.logging.Logger;
  * @author pavl_g.
  */
 public class JmeSurfaceView extends RelativeLayout implements SystemListener, DialogInterface.OnClickListener, LifecycleEventObserver {
-
+    private void runOnUiThread(Runnable action) {
+        ((Activity) getContext()).runOnUiThread(action);
+    }
     private static final Logger jmeSurfaceViewLogger = Logger.getLogger(JmeSurfaceView.class.getName());
     /*AppSettings attributes*/
     protected String audioRendererType = AppSettings.ANDROID_OPENAL_SOFT;
@@ -239,11 +241,12 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
     }
 
     private void removeGLSurfaceView() {
-        ((Activity) getContext()).runOnUiThread(() -> {
+        runOnUiThread(()->{
             if (glSurfaceView != null) {
                 JmeSurfaceView.this.removeView(glSurfaceView);
             }
         });
+
     }
 
     @Override
@@ -319,12 +322,16 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
         }
         legacyApplication.update();
         if (!GameState.isFirstUpdatePassed()) {
-            ((Activity) getContext()).runOnUiThread(() -> {
-                jmeSurfaceViewLogger.log(Level.INFO, "User delay finishes with 0 errors");
-                if (onRendererCompleted != null) {
-                    onRendererCompleted.onRenderCompletion(legacyApplication, legacyApplication.getContext().getSettings());
-                }
-            });
+           runOnUiThread(()->{
+               jmeSurfaceViewLogger.log(Level.INFO, "User delay finishes with 0 errors");
+               if (onRendererCompleted != null) {
+                   onRendererCompleted.onRenderCompletion(legacyApplication, legacyApplication.getContext().getSettings());
+               }
+           });
+
+
+
+
             GameState.setFirstUpdatePassed(true);
         }
     }
