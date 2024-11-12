@@ -3,8 +3,7 @@
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
@@ -49,23 +48,20 @@ import javax.imageio.ImageIO;
 
 public class AWTLoader implements AssetLoader {
 
-    public static final ColorModel AWT_RGBA4444 = new DirectColorModel(16,
-                                                                       0xf000,
-                                                                       0x0f00,
-                                                                       0x00f0,
-                                                                       0x000f);
+    public static final ColorModel AWT_RGBA4444 = new DirectColorModel(16, 0xf000, 0x0f00, 0x00f0, 0x000f);
 
-    public static final ColorModel AWT_RGBA5551
-            = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 
-                                      new int[]{5, 5, 5, 1},
-                                      true,
-                                      false,
-                                      Transparency.BITMASK,
-                                      DataBuffer.TYPE_BYTE);
+    public static final ColorModel AWT_RGBA5551 = new ComponentColorModel(
+            ColorSpace.getInstance(ColorSpace.CS_sRGB),
+            new int[]{5, 5, 5, 1},
+            true,
+            false,
+            Transparency.BITMASK,
+            DataBuffer.TYPE_BYTE
+    );
 
-    private Object extractImageData(BufferedImage img){
+    private Object extractImageData(BufferedImage img) {
         DataBuffer buf = img.getRaster().getDataBuffer();
-        switch (buf.getDataType()){
+        switch (buf.getDataType()) {
             case DataBuffer.TYPE_BYTE:
                 DataBufferByte byteBuf = (DataBufferByte) buf;
                 return byteBuf.getData();
@@ -76,9 +72,7 @@ public class AWTLoader implements AssetLoader {
         return null;
     }
 
-
-
-     private void flipImage(Object img, int width, int height, int bpp) {
+    private void flipImage(Object img, int width, int height, int bpp) {
         int scSz = (width * bpp) / 8;
         int elementSize = img instanceof byte[] ? 1 : (img instanceof short[] ? 2 : 0);
 
@@ -87,113 +81,85 @@ public class AWTLoader implements AssetLoader {
         }
 
         scSz /= elementSize; // Adjust for short type
+        Object sln = java.lang.reflect.Array.newInstance(
+                img instanceof byte[] ? byte.class : short.class, scSz
+        );
 
-        Object sln = (elementSize == 1) ? new byte[scSz] : new short[scSz];
-
-        int y2 = 0;
+        int y2;
         for (int y1 = 0; y1 < height / 2; y1++) {
             y2 = height - y1 - 1;
-            if (elementSize == 1) {
-                System.arraycopy(img, y1 * scSz, sln, 0, scSz);
-                System.arraycopy(img, y2 * scSz, img, y1 * scSz, scSz);
-                System.arraycopy(sln, 0, img, y2 * scSz, scSz);
-            } else if (elementSize == 2) {
-                System.arraycopy(img, y1 * scSz, sln, 0, scSz);
-                System.arraycopy(img, y2 * scSz, img, y1 * scSz, scSz);
-                System.arraycopy(sln, 0, img, y2 * scSz, scSz);
-            }
+            System.arraycopy(img, y1 * scSz, sln, 0, scSz);
+            System.arraycopy(img, y2 * scSz, img, y1 * scSz, scSz);
+            System.arraycopy(sln, 0, img, y2 * scSz, scSz);
         }
     }
-    // private void flipImage(byte[] img, int width, int height, int bpp){
-    //     int scSz = (width * bpp) / 8;
-    //     byte[] sln = new byte[scSz];
-    //     int y2 = 0;
-    //     for (int y1 = 0; y1 < height / 2; y1++){
-    //         y2 = height - y1 - 1;
-    //         System.arraycopy(img, y1 * scSz, sln, 0,         scSz);
-    //         System.arraycopy(img, y2 * scSz, img, y1 * scSz, scSz);
-    //         System.arraycopy(sln, 0,         img, y2 * scSz, scSz);
-    //     }
-    // }
-    
-    // private void flipImage(short[] img, int width, int height, int bpp){
-    //     int scSz = (width * bpp) / 8;
-    //     scSz /= 2; // Because shorts are 2 bytes
-    //     short[] sln = new short[scSz];
-    //     int y2 = 0;
-    //     for (int y1 = 0; y1 < height / 2; y1++){
-    //         y2 = height - y1 - 1;
-    //         System.arraycopy(img, y1 * scSz, sln, 0,         scSz);
-    //         System.arraycopy(img, y2 * scSz, img, y1 * scSz, scSz);
-    //         System.arraycopy(sln, 0,         img, y2 * scSz, scSz);
-    //     }
-    // }
 
-    public Image load(BufferedImage img, boolean flipY){
+    public Image load(BufferedImage img, boolean flipY) {
         int width = img.getWidth();
         int height = img.getHeight();
 
-        switch (img.getType()){
-            case BufferedImage.TYPE_4BYTE_ABGR: // most common in PNG images w/ alpha
-               byte[] dataBuf1 = (byte[]) extractImageData(img);
-               if (flipY)
-                   flipImage(dataBuf1, width, height, 32);
-                
-               ByteBuffer data1 = BufferUtils.createByteBuffer(img.getWidth()*img.getHeight()*4);
-               data1.put(dataBuf1);
-               return new Image(Format.ABGR8, width, height, data1, null, com.jme3.texture.image.ColorSpace.sRGB);
-            case BufferedImage.TYPE_3BYTE_BGR: // most common in JPEG images
-               byte[] dataBuf2 = (byte[]) extractImageData(img);
-               if (flipY)
-                   flipImage(dataBuf2, width, height, 24);
-               
-               ByteBuffer data2 = BufferUtils.createByteBuffer(img.getWidth()*img.getHeight()*3);
-               data2.put(dataBuf2);
-               return new Image(Format.BGR8, width, height, data2, null, com.jme3.texture.image.ColorSpace.sRGB);
-            case BufferedImage.TYPE_BYTE_GRAY: // grayscale fonts
+        switch (img.getType()) {
+            case BufferedImage.TYPE_4BYTE_ABGR: // PNG images with alpha
+                byte[] dataBuf1 = (byte[]) extractImageData(img);
+                if (flipY)
+                    flipImage(dataBuf1, width, height, 32);
+
+                ByteBuffer data1 = BufferUtils.createByteBuffer(width * height * 4);
+                data1.put(dataBuf1);
+                return new Image(Format.ABGR8, width, height, data1, null, com.jme3.texture.image.ColorSpace.sRGB);
+
+            case BufferedImage.TYPE_3BYTE_BGR: // JPEG images
+                byte[] dataBuf2 = (byte[]) extractImageData(img);
+                if (flipY)
+                    flipImage(dataBuf2, width, height, 24);
+
+                ByteBuffer data2 = BufferUtils.createByteBuffer(width * height * 3);
+                data2.put(dataBuf2);
+                return new Image(Format.BGR8, width, height, data2, null, com.jme3.texture.image.ColorSpace.sRGB);
+
+            case BufferedImage.TYPE_BYTE_GRAY: // Grayscale images
                 byte[] dataBuf3 = (byte[]) extractImageData(img);
                 if (flipY)
                     flipImage(dataBuf3, width, height, 8);
-                ByteBuffer data3 = BufferUtils.createByteBuffer(img.getWidth()*img.getHeight());
+
+                ByteBuffer data3 = BufferUtils.createByteBuffer(width * height);
                 data3.put(dataBuf3);
                 return new Image(Format.Luminance8, width, height, data3, null, com.jme3.texture.image.ColorSpace.sRGB);
+
             default:
                 break;
         }
 
+        // Fallback: manually extract pixel data
         int channels = (img.getTransparency() == Transparency.OPAQUE) ? 3 : 4;
-        ByteBuffer data = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * channels);
+        ByteBuffer data = BufferUtils.createByteBuffer(width * height * channels);
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int ny = flipY ? height - y - 1 : y;
                 int rgb = img.getRGB(x, ny);
 
-                // Extract RGB components
-                byte r = (byte) ((rgb & 0x00FF0000) >> 16);
-                byte g = (byte) ((rgb & 0x0000FF00) >> 8);
-                byte b = (byte) (rgb & 0x000000FF);
+                byte r = (byte) ((rgb >> 16) & 0xFF);
+                byte g = (byte) ((rgb >> 8) & 0xFF);
+                byte b = (byte) (rgb & 0xFF);
                 data.put(r).put(g).put(b);
 
-                // If there is alpha, include it
                 if (channels == 4) {
-                    byte a = (byte) ((rgb & 0xFF000000) >> 24);
+                    byte a = (byte) ((rgb >> 24) & 0xFF);
                     data.put(a);
                 }
             }
         }
         data.flip();
 
-        // Return image based on the channel count
         Format format = (channels == 3) ? Format.RGB8 : Format.RGBA8;
         return new Image(format, width, height, data, null, com.jme3.texture.image.ColorSpace.sRGB);
     }
 
-
-    public Image load(InputStream in, boolean flipY) throws IOException{
+    public Image load(InputStream in, boolean flipY) throws IOException {
         ImageIO.setUseCache(false);
         BufferedImage img = ImageIO.read(in);
-        if (img == null){
+        if (img == null) {
             return null;
         }
         return load(img, flipY);
@@ -201,17 +167,17 @@ public class AWTLoader implements AssetLoader {
 
     @Override
     public Object load(AssetInfo info) throws IOException {
-        if (ImageIO.getImageReadersBySuffix(info.getKey().getExtension()) != null){
+        if (ImageIO.getImageReadersBySuffix(info.getKey().getExtension()) != null) {
             boolean flip = ((TextureKey) info.getKey()).isFlipY();
             try (InputStream in = info.openStream();
-                    BufferedInputStream bin = new BufferedInputStream(in)) {
+                 BufferedInputStream bin = new BufferedInputStream(in)) {
                 Image img = load(bin, flip);
-                if (img == null){
-                    throw new AssetLoadException("The given image cannot be loaded " + info.getKey());
+                if (img == null) {
+                    throw new AssetLoadException("The given image cannot be loaded: " + info.getKey());
                 }
                 return img;
             }
-        }else{
+        } else {
             throw new AssetLoadException("The extension " + info.getKey().getExtension() + " is not supported");
         }
     }
