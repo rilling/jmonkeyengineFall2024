@@ -244,7 +244,11 @@ public class AndroidJoystickJoyInput14 {
 
         return consumed;
     }
-
+    private void logRemap(String original, String logicalId) {
+        if (logger.isLoggable(Level.FINE) && !Objects.equals(logicalId, original)) {
+            logger.log(Level.FINE, "Remapped: {0} to: {1}", new Object[]{original, logicalId});
+        }
+    }
     protected class AndroidJoystick extends AbstractJoystick {
 
         private JoystickAxis nullAxis;
@@ -328,10 +332,7 @@ public class AndroidJoystickJoyInput14 {
             }
 
             String logicalId = JoystickCompatibilityMappings.remapButton( getName(), original );
-            if (logger.isLoggable(Level.FINE) && !Objects.equals(logicalId, original)) {
-                logger.log(Level.FINE, "Remapped: {0} to: {1}",
-                        new Object[]{original, logicalId});
-            }
+            logRemap(original, logicalId);
 
             JoystickButton button = new DefaultJoystickButton( getInputManager(), this, getButtonCount(),
                                                                name, logicalId );
@@ -339,6 +340,7 @@ public class AndroidJoystickJoyInput14 {
             buttonIndex.put( keyCode, button );
             return button;
         }
+
 
         protected JoystickAxis addAxis(MotionRange motionRange) {
 
@@ -359,10 +361,7 @@ public class AndroidJoystickJoyInput14 {
                 original = JoystickAxis.POV_Y;
             }
             String logicalId = JoystickCompatibilityMappings.remapAxis( getName(), original );
-            if (logger.isLoggable(Level.FINE) && !Objects.equals(logicalId, original)) {
-                logger.log(Level.FINE, "Remapped: {0} to: {1}",
-                        new Object[]{original, logicalId});
-            }
+            logRemap(original, logicalId);
 
             JoystickAxis axis = new DefaultJoystickAxis(getInputManager(),
                                                 this,
