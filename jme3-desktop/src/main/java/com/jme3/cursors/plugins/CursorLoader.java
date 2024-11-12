@@ -263,6 +263,17 @@ public class CursorLoader implements AssetLoader {
         return jmeCursor;
     }
 
+    private int getColorFromImage(byte[] icoImage, int colorTableOffset, int index) {
+        int rgb = 0;
+        rgb |= (ubyte(icoImage[colorTableOffset + index * 4 + 2]));
+        rgb <<= 8;
+        rgb |= (ubyte(icoImage[colorTableOffset + index * 4 + 1]));
+        rgb <<= 8;
+        rgb |= (ubyte(icoImage[colorTableOffset + index * 4]));
+        return rgb;
+    }
+
+
     private BufferedImage[] parseICOImage(byte[] icoImage) throws IOException {
         /*
          * Most of this is original code by Jeff Friesen at
@@ -398,15 +409,7 @@ public class CursorLoader implements AssetLoader {
                                 index = 0;
                             }
 
-                            int rgb = 0;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 2]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 1]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index
-                                    * 4]));
+                            int rgb = getColorFromImage(icoImage, colorTableOffset, index);
 
                             if ((ubyte(icoImage[andImageOffset + row
                                     * scanlineBytes + col / 8])
@@ -440,15 +443,7 @@ public class CursorLoader implements AssetLoader {
                                         & 15;
                             }
 
-                            int rgb = 0;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 2]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 1]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index
-                                    * 4]));
+                            int rgb = getColorFromImage(icoImage, colorTableOffset, index);
 
                             if ((ubyte(icoImage[andImageOffset + row
                                     * calcScanlineBytes(width, 1)
@@ -475,14 +470,7 @@ public class CursorLoader implements AssetLoader {
                             index = ubyte(icoImage[xorImageOffset + row
                                     * scanlineBytes + col]);
 
-                            int rgb = 0;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 2]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 1]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4]));
+                            int rgb = getColorFromImage(icoImage, colorTableOffset, index);
 
                             if ((ubyte(icoImage[andImageOffset + row
                                     * calcScanlineBytes(width, 1)
