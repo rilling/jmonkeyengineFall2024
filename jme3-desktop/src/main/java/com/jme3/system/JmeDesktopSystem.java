@@ -127,10 +127,74 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         }
     }
 
-    
-    public JmeContext createContext(String className) {
+    @SuppressWarnings("unchecked")
+    private JmeContext newContextLwjgl(AppSettings settings, JmeContext.Type type) {
         try {
-            Class<?> ctxClazz = Class.forName(className);
+            Class ctxClazz = null;
+            switch (type) {
+                case Canvas:
+                    ctxClazz = Class.forName("com.jme3.system.lwjgl.LwjglCanvas");
+                    break;
+                case Display:
+                    ctxClazz = Class.forName("com.jme3.system.lwjgl.LwjglDisplay");
+                    break;
+                case OffscreenSurface:
+                    ctxClazz = Class.forName("com.jme3.system.lwjgl.LwjglOffscreenBuffer");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported context type " + type);
+            }
+
+            return (JmeContext) ctxClazz.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException ex) {
+            logger.log(Level.SEVERE, "Failed to create context", ex);
+        } catch (ClassNotFoundException ex) {
+            logger.log(Level.SEVERE, "CRITICAL ERROR: Context class is missing!\n"
+                    + "Make sure jme3_lwjgl-ogl is on the classpath.", ex);
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private JmeContext newContextJogl(AppSettings settings, JmeContext.Type type) {
+        try {
+            Class ctxClazz = null;
+            switch (type) {
+                case Display:
+                    ctxClazz = Class.forName("com.jme3.system.jogl.JoglNewtDisplay");
+                    break;
+                case Canvas:
+                    ctxClazz = Class.forName("com.jme3.system.jogl.JoglNewtCanvas");
+                    break;
+                case OffscreenSurface:
+                    ctxClazz = Class.forName("com.jme3.system.jogl.JoglOffscreenBuffer");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported context type " + type);
+            }
+
+            return (JmeContext) ctxClazz.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException ex) {
+            logger.log(Level.SEVERE, "Failed to create context", ex);
+        } catch (ClassNotFoundException ex) {
+            logger.log(Level.SEVERE, "CRITICAL ERROR: Context class is missing!\n"
+                    + "Make sure jme3-jogl is on the classpath.", ex);
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private JmeContext newContextCustom(AppSettings settings, JmeContext.Type type) {
+        try {
+            String className = settings.getRenderer().substring("CUSTOM".length());
+
+            Class ctxClazz = Class.forName(className);
             return (JmeContext) ctxClazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException
@@ -139,23 +203,8 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         } catch (ClassNotFoundException ex) {
             logger.log(Level.SEVERE, "CRITICAL ERROR: Context class is missing!", ex);
         }
+
         return null;
-    }
-
-    public JmeContext createContext(String contextClassName, String classpathMessage) {
-    	return createContext(contextClassName);
-    	
-    }
-
-    JmeContext lwjglContext = createContext("com.jme3.system.lwjgl.Lwj"
-    		+ "glOffscreenBuffer", "jme3_lwjgl-ogl");
-
-    JmeContext joglContext = createContext("com.jme3.system.jogl.JoglOff"
-    		+ "screenBuffer", "jme3-jogl");
-
-    @SuppressWarnings("unchecked")
-    private JmeContext newContextCustom(AppSettings settings, JmeContext.Type type) {
-    	return createContext(className);
     }
 
     @Override
