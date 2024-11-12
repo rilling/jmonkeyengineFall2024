@@ -272,37 +272,26 @@ public class CursorLoader implements AssetLoader {
         rgb |= (ubyte(icoImage[colorTableOffset + index * 4]));
         return rgb;
     }
-
-
     private BufferedImage[] parseICOImage(byte[] icoImage) throws IOException {
-        /*
-         * Most of this is original code by Jeff Friesen at
-         * http://www.informit.com/articles/article.aspx?p=1186882&seqNum=3
-         */
-
         BufferedImage[] bi;
-        // Check resource type field.
-
         int deLength = 16; // directory entry length
         int bmihLength = 40; // BITMAPINFOHEADER length
-
+    
         if (icoImage[2] != 1 && icoImage[2] != 2 || icoImage[3] != 0) {
             throw new IllegalArgumentException("Bad data in ICO/CUR file. ImageType has to be either 1 or 2.");
         }
-
+    
         int numImages = ubyte(icoImage[5]);
         numImages <<= 8;
         numImages |= icoImage[4];
         bi = new BufferedImage[numImages];
         int[] colorCount = new int[numImages];
-
+    
         for (int i = 0; i < numImages; i++) {
             int width = ubyte(icoImage[FDE_OFFSET + i * deLength]);
-
             int height = ubyte(icoImage[FDE_OFFSET + i * deLength + 1]);
-
             colorCount[i] = ubyte(icoImage[FDE_OFFSET + i * deLength + 2]);
-
+    
             int bytesInRes = ubyte(icoImage[FDE_OFFSET + i * deLength + 11]);
             bytesInRes <<= 8;
             bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * deLength + 10]);
@@ -310,7 +299,7 @@ public class CursorLoader implements AssetLoader {
             bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * deLength + 9]);
             bytesInRes <<= 8;
             bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * deLength + 8]);
-
+    
             int imageOffset = ubyte(icoImage[FDE_OFFSET + i * deLength + 15]);
             imageOffset <<= 8;
             imageOffset |= ubyte(icoImage[FDE_OFFSET + i * deLength + 14]);
@@ -318,215 +307,38 @@ public class CursorLoader implements AssetLoader {
             imageOffset |= ubyte(icoImage[FDE_OFFSET + i * deLength + 13]);
             imageOffset <<= 8;
             imageOffset |= ubyte(icoImage[FDE_OFFSET + i * deLength + 12]);
-
-            if (icoImage[imageOffset] == 40
-                    && icoImage[imageOffset + 1] == 0
-                    && icoImage[imageOffset + 2] == 0
-                    && icoImage[imageOffset + 3] == 0) {
-                // BITMAPINFOHEADER detected
-
-                int _width = ubyte(icoImage[imageOffset + 7]);
-                _width <<= 8;
-                _width |= ubyte(icoImage[imageOffset + 6]);
-                _width <<= 8;
-                _width |= ubyte(icoImage[imageOffset + 5]);
-                _width <<= 8;
-                _width |= ubyte(icoImage[imageOffset + 4]);
-
-                // If width is 0 (for 256 pixels or higher), _width contains
-                // actual width.
-
-                if (width == 0) {
-                    width = _width;
-                }
-
-                int _height = ubyte(icoImage[imageOffset + 11]);
-                _height <<= 8;
-                _height |= ubyte(icoImage[imageOffset + 10]);
-                _height <<= 8;
-                _height |= ubyte(icoImage[imageOffset + 9]);
-                _height <<= 8;
-                _height |= ubyte(icoImage[imageOffset + 8]);
-
-                // If height is 0 (for 256 pixels or higher), _height contains
-                // actual height times 2.
-
-                if (height == 0) {
-                    height = _height >> 1; // Divide by 2.
-                }
-                int planes = ubyte(icoImage[imageOffset + 13]);
-                planes <<= 8;
-                planes |= ubyte(icoImage[imageOffset + 12]);
-
-                int bitCount = ubyte(icoImage[imageOffset + 15]);
-                bitCount <<= 8;
-                bitCount |= ubyte(icoImage[imageOffset + 14]);
-
-                // If colorCount [i] is 0, the number of colors is determined
-                // from the planes and bitCount values. For example, the number
-                // of colors is 256 when planes is 1 and bitCount is 8. Leave
-                // colorCount [i] set to 0 when planes is 1 and bitCount is 32.
-
-                if (colorCount[i] == 0) {
-                    if (planes == 1) {
-                        if (bitCount == 1) {
-                            colorCount[i] = 2;
-                        } else if (bitCount == 4) {
-                            colorCount[i] = 16;
-                        } else if (bitCount == 8) {
-                            colorCount[i] = 256;
-                        } else if (bitCount != 32) {
-                            colorCount[i] = (int) Math.pow(2, bitCount);
-                        }
-                    } else {
-                        colorCount[i] = (int) Math.pow(2, (double) bitCount * planes);
-                    }
-                }
-
-                bi[i] = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-                // Parse image to image buffer.
-
+    
+            if (icoImage[imageOffset] == 40 && icoImage[imageOffset + 1] == 0 && icoImage[imageOffset + 2] == 0 && icoImage[imageOffset + 3] == 0) {
                 int colorTableOffset = imageOffset + bmihLength;
-
+                bi[i] = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    
                 if (colorCount[i] == 2) {
                     int xorImageOffset = colorTableOffset + 2 * 4;
-
                     int scanlineBytes = calcScanlineBytes(width, 1);
-                    int andImageOffset = xorImageOffset + scanlineBytes * height;
-
                     int[] masks = {128, 64, 32, 16, 8, 4, 2, 1};
-
-                    for (int row = 0; row < height; row++) {
-                        for (int col = 0; col < width; col++) {
-                            int index;
-
-                            if ((ubyte(icoImage[xorImageOffset + row
-                                    * scanlineBytes + col / 8])
-                                    & masks[col % 8]) != 0) {
-                                index = 1;
-                            } else {
-                                index = 0;
-                            }
-
-                            int rgb = getColorFromImage(icoImage, colorTableOffset, index);
-
-                            if ((ubyte(icoImage[andImageOffset + row
-                                    * scanlineBytes + col / 8])
-                                    & masks[col % 8]) != 0) {
-                                bi[i].setRGB(col, height - 1 - row, rgb);
-                            } else {
-                                bi[i].setRGB(col, height - 1 - row,
-                                        0xff000000 | rgb);
-                            }
-                        }
-                    }
+    
+                    // Call processImageData for 2-color processing
+                    processImageData(bi[i], icoImage, xorImageOffset, scanlineBytes, 2, masks, width, height);
                 } else if (colorCount[i] == 16) {
                     int xorImageOffset = colorTableOffset + 16 * 4;
-
                     int scanlineBytes = calcScanlineBytes(width, 4);
-                    int andImageOffset = xorImageOffset + scanlineBytes * height;
-
                     int[] masks = {128, 64, 32, 16, 8, 4, 2, 1};
-
-                    for (int row = 0; row < height; row++) {
-                        for (int col = 0; col < width; col++) {
-                            int index;
-                            if ((col & 1) == 0) // even
-                            {
-                                index = ubyte(icoImage[xorImageOffset + row
-                                        * scanlineBytes + col / 2]);
-                                index >>= 4;
-                            } else {
-                                index = ubyte(icoImage[xorImageOffset + row
-                                        * scanlineBytes + col / 2])
-                                        & 15;
-                            }
-
-                            int rgb = getColorFromImage(icoImage, colorTableOffset, index);
-
-                            if ((ubyte(icoImage[andImageOffset + row
-                                    * calcScanlineBytes(width, 1)
-                                    + col / 8]) & masks[col % 8])
-                                    != 0) {
-                                bi[i].setRGB(col, height - 1 - row, rgb);
-                            } else {
-                                bi[i].setRGB(col, height - 1 - row,
-                                        0xff000000 | rgb);
-                            }
-                        }
-                    }
-                } else if (colorCount[i] == 256) {
-                    int xorImageOffset = colorTableOffset + 256 * 4;
-
-                    int scanlineBytes = calcScanlineBytes(width, 8);
-                    int andImageOffset = xorImageOffset + scanlineBytes * height;
-
-                    int[] masks = {128, 64, 32, 16, 8, 4, 2, 1};
-
-                    for (int row = 0; row < height; row++) {
-                        for (int col = 0; col < width; col++) {
-                            int index;
-                            index = ubyte(icoImage[xorImageOffset + row
-                                    * scanlineBytes + col]);
-
-                            int rgb = getColorFromImage(icoImage, colorTableOffset, index);
-
-                            if ((ubyte(icoImage[andImageOffset + row
-                                    * calcScanlineBytes(width, 1)
-                                    + col / 8]) & masks[col % 8])
-                                    != 0) {
-                                bi[i].setRGB(col, height - 1 - row, rgb);
-                            } else {
-                                bi[i].setRGB(col, height - 1 - row,
-                                        0xff000000 | rgb);
-                            }
-                        }
-                    }
-                } else if (colorCount[i] == 0) {
-                    int scanlineBytes = calcScanlineBytes(width, 32);
-
-                    for (int row = 0; row < height; row++) {
-                        for (int col = 0; col < width; col++) {
-                            int rgb = ubyte(icoImage[colorTableOffset + row
-                                    * scanlineBytes + col * 4 + 3]);
-                            rgb <<= 8;
-                            rgb |= ubyte(icoImage[colorTableOffset + row
-                                    * scanlineBytes + col * 4 + 2]);
-                            rgb <<= 8;
-                            rgb |= ubyte(icoImage[colorTableOffset + row
-                                    * scanlineBytes + col * 4 + 1]);
-                            rgb <<= 8;
-                            rgb |= ubyte(icoImage[colorTableOffset + row
-                                    * scanlineBytes + col * 4]);
-
-                            bi[i].setRGB(col, height - 1 - row, rgb);
-                        }
-                    }
+    
+                    // Call processImageData for 16-color processing
+                    processImageData(bi[i], icoImage, xorImageOffset, scanlineBytes, 16, masks, width, height);
                 }
-            } else if (ubyte(icoImage[imageOffset]) == 0x89
-                    && icoImage[imageOffset + 1] == 0x50
-                    && icoImage[imageOffset + 2] == 0x4e
-                    && icoImage[imageOffset + 3] == 0x47
-                    && icoImage[imageOffset + 4] == 0x0d
-                    && icoImage[imageOffset + 5] == 0x0a
-                    && icoImage[imageOffset + 6] == 0x1a
-                    && icoImage[imageOffset + 7] == 0x0a) {
+            } else if (ubyte(icoImage[imageOffset]) == 0x89 && icoImage[imageOffset + 1] == 0x50 && icoImage[imageOffset + 2] == 0x4e && icoImage[imageOffset + 3] == 0x47 && icoImage[imageOffset + 4] == 0x0d && icoImage[imageOffset + 5] == 0x0a && icoImage[imageOffset + 6] == 0x1a && icoImage[imageOffset + 7] == 0x0a) {
                 // PNG detected
-
-                ByteArrayInputStream bais;
-                bais = new ByteArrayInputStream(icoImage, imageOffset,
-                        bytesInRes);
+                ByteArrayInputStream bais = new ByteArrayInputStream(icoImage, imageOffset, bytesInRes);
                 bi[i] = ImageIO.read(bais);
             } else {
-                throw new IllegalArgumentException("Bad data in ICO/CUR file. BITMAPINFOHEADER or PNG "
-                        + "expected");
+                throw new IllegalArgumentException("Bad data in ICO/CUR file. BITMAPINFOHEADER or PNG expected");
             }
         }
-        icoImage = null; // This array can now be garbage collected.
-
+    
         return bi;
     }
+    
 
     private int ubyte(byte b) {
         return (b < 0) ? 256 + b : b; // Convert byte to unsigned byte.
@@ -739,6 +551,39 @@ public class CursorLoader implements AssetLoader {
                 imgDelay.rewind();
             }
             data.rewind();
+        }   
+    }
+    private void processImageData(BufferedImage bi, byte[] icoImage, int xorImageOffset, int scanlineBytes, int colorCount, int[] masks, int width, int height) {
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                int index=0;
+                if (colorCount == 2) {
+                    // Process as a 2-color (monochrome) image
+                    if ((ubyte(icoImage[xorImageOffset + row * scanlineBytes + col / 8]) & masks[col % 8]) != 0) {
+                        index = 1;
+                    } else {
+                        index = 0;
+                    }
+                } else if (colorCount == 16) {
+                    // Process as a 16-color image
+                    if ((col & 1) == 0) {
+                        index = ubyte(icoImage[xorImageOffset + row * scanlineBytes + col / 2]) >> 4;
+                    } else {
+                        index = ubyte(icoImage[xorImageOffset + row * scanlineBytes + col / 2]) & 15;
+                    }
+                }
+    
+                int rgb = getColorFromImage(icoImage, xorImageOffset, index);
+                if (colorCount == 2) {
+                    if ((ubyte(icoImage[scanlineBytes * height + row * scanlineBytes + col / 8]) & masks[col % 8]) != 0) {
+                        bi.setRGB(col, height - 1 - row, rgb);
+                    } else {
+                        bi.setRGB(col, height - 1 - row, 0xff000000 | rgb);
+                    }
+                } else {
+                    bi.setRGB(col, height - 1 - row, rgb);
+                }
+            }
         }
     }
 }
