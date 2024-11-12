@@ -127,24 +127,10 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private JmeContext newContextLwjgl(AppSettings settings, JmeContext.Type type) {
+    // Helper method to avoid repetition
+    private JmeContext createContext(String className) {
         try {
-            Class ctxClazz = null;
-            switch (type) {
-                case Canvas:
-                    ctxClazz = Class.forName("com.jme3.system.lwjgl.LwjglCanvas");
-                    break;
-                case Display:
-                    ctxClazz = Class.forName("com.jme3.system.lwjgl.LwjglDisplay");
-                    break;
-                case OffscreenSurface:
-                    ctxClazz = Class.forName("com.jme3.system.lwjgl.LwjglOffscreenBuffer");
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported context type " + type);
-            }
-
+            Class<?> ctxClazz = Class.forName(className);
             return (JmeContext) ctxClazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException
@@ -152,9 +138,8 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
             logger.log(Level.SEVERE, "Failed to create context", ex);
         } catch (ClassNotFoundException ex) {
             logger.log(Level.SEVERE, "CRITICAL ERROR: Context class is missing!\n"
-                    + "Make sure jme3_lwjgl-ogl is on the classpath.", ex);
+                    + "Make sure the appropriate context jar is on the classpath.", ex);
         }
-
         return null;
     }
 
@@ -234,20 +219,23 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T newObject(String className) {
-        try {
-            Class<T> clazz = (Class<T>) Class.forName(className);
-            return clazz.getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException ex) {
-            logger.log(Level.SEVERE, "CRITICAL ERROR: Audio implementation class "
-                    + className + " is missing!\n", ex);
-        } catch (InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException ex) {
-            logger.log(Level.SEVERE, "Failed to create context", ex);
+    private JmeContext newContextLwjgl(AppSettings settings, JmeContext.Type type) {
+        String className = null;
+        switch (type) {
+            case Canvas:
+                className = "com.jme3.system.lwjgl.LwjglCanvas";
+                break;
+            case Display:
+                className = "com.jme3.system.lwjgl.LwjglDisplay";
+                break;
+            case OffscreenSurface:
+                className = "com.jme3.system.lwjgl.LwjglOffscreenBuffer";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported context type " + type);
         }
 
-        return null;
+        return createContext(className);
     }
 
     @Override
