@@ -53,7 +53,7 @@ import javax.swing.SwingUtilities;
  */
 public class AppletHarness extends Applet {
 
-    public static final HashMap<LegacyApplication, Applet> appToApplet
+    protected static final HashMap<LegacyApplication, Applet> appToApplet
                          = new HashMap<LegacyApplication, Applet>();
 
     protected JmeCanvasContext context;
@@ -174,12 +174,9 @@ public class AppletHarness extends Applet {
     @Override
     public void destroy(){
         System.out.println("applet:destroyStart");
-        SwingUtilities.invokeLater(new Runnable(){
-            @Override
-            public void run(){
-                removeAll();
-                System.out.println("applet:destroyRemoved");
-            }
+        SwingUtilities.invokeLater(() -> {
+            removeAll();
+            System.out.println("applet:destroyRemoved");
         });
         app.stop(true);
         System.out.println("applet:destroyDone");

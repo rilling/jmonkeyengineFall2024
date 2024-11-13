@@ -62,8 +62,8 @@ public class TestMusicPlayer extends javax.swing.JFrame {
         // started, but in this test we do not create a LwjglContext,
         // so we should handle loading natives ourselves if running
         // with lwjgl 2.
-        NativeLibraryLoader.loadNativeLibrary(NativeLibraries.Lwjgl.getName(), false);
-        NativeLibraryLoader.loadNativeLibrary(NativeLibraries.OpenAL.getName(), false);
+        NativeLibraryLoader.loadNativeLibrary(NativeLibraries.LWJGL.getName(), false);
+        NativeLibraryLoader.loadNativeLibrary(NativeLibraries.OPEN_AL.getName(), false);
     }
 
     public TestMusicPlayer() {
