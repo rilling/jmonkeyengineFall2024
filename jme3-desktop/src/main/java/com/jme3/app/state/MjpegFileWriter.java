@@ -75,12 +75,11 @@ public class MjpegFileWriter implements AutoCloseable {
     private byte[] fcc2;
     private byte[] data;
 
-    public MjpegFileWriter(File aviFile, int width, int height, double framerate) throws Exception {
+    public MjpegFileWriter(File aviFile, int width, int height, double framerate) throws IOException {
         this(aviFile, width, height, framerate, 0);
     }
 
-    public MjpegFileWriter(File aviFile, int width, int height, double framerate, int numFrames)
-            throws Exception {
+    public MjpegFileWriter(File aviFile, int width, int height, double framerate, int numFrames) throws Exception {
         this.aviFile = aviFile;
         this.width = width;
         this.height = height;
@@ -97,19 +96,19 @@ public class MjpegFileWriter implements AutoCloseable {
         aviOutput.write(listBytes);
         indexlist = new AVIIndexList();
 
-        position = headerBytes.length + listBytes.length;
+        position = (long) headerBytes.length + listBytes.length;
     }
 
-    public void addImage(Image image) throws Exception {
+    public void addImage(Image image) throws IOException {
         addImage(image, 0.8f);
     }
 
-    public void addImage(Image image, float quality) throws Exception {
+    public void addImage(Image image, float quality) throws IOException {
         addImage(writeImageToBytes(image, quality));
     }
 
     public void addImage(byte[] imageData) throws Exception {
-        byte[] fcc = new byte[] { '0', '0', 'd', 'b' };
+        byte[] fcc = new byte[]{'0', '0', 'd', 'b'};
         int useLength = imageData.length;
         int extra = (useLength + (int) position) % 4;
         if (extra > 0) {
@@ -131,7 +130,7 @@ public class MjpegFileWriter implements AutoCloseable {
         aviOutput.write(data);
         imageData = null;
 
-        numFrames++; // add a frame
+        numFrames++; //add a frame
         position += data.length;
     }
 
@@ -170,17 +169,6 @@ public class MjpegFileWriter implements AutoCloseable {
         return baos.toByteArray();
     }
 
-    // public void writeAVI(File file) throws Exception
-    // {
-    // OutputStream os = new FileOutputStream(file);
-    //
-    // // RIFFHeader
-    // // AVIMainHeader
-    // // AVIStreamList
-    // // AVIStreamHeader
-    // // AVIStreamFormat
-    // // write 00db and image bytes...
-    // }
     public static int swapInt(int v) {
         return (v >>> 24) | (v << 24) | ((v << 8) & 0x00FF0000) | ((v >> 8) & 0x0000FF00);
     }
@@ -219,7 +207,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public byte[] fcc2 = new byte[] { 'A', 'V', 'I', ' ' };
         public byte[] fcc3 = new byte[] { 'L', 'I', 'S', 'T' };
         public int listSize = 200;
-        public byte[] fcc4 = new byte[] { 'h', 'd', 'r', 'l' };
+        public byte[] fcc4 = new byte[]{'h', 'd', 'r', 'l'};
 
         public RIFFHeader() {
         }
@@ -244,12 +232,14 @@ public class MjpegFileWriter implements AutoCloseable {
     private class AVIMainHeader {
         /*
          *
-         * FOURCC fcc; DWORD cb; DWORD dwMicroSecPerFrame; DWORD dwMaxBytesPerSec; DWORD dwPaddingGranularity;
-         * DWORD dwFlags; DWORD dwTotalFrames; DWORD dwInitialFrames; DWORD dwStreams; DWORD
-         * dwSuggestedBufferSize; DWORD dwWidth; DWORD dwHeight; DWORD dwReserved[4];
+         * FOURCC fcc; DWORD cb; DWORD dwMicroSecPerFrame; DWORD
+         * dwMaxBytesPerSec; DWORD dwPaddingGranularity; DWORD dwFlags; DWORD
+         * dwTotalFrames; DWORD dwInitialFrames; DWORD dwStreams; DWORD
+         * dwSuggestedBufferSize; DWORD dwWidth; DWORD dwHeight; DWORD
+         * dwReserved[4];
          */
 
-        public byte[] fcc = new byte[] { 'a', 'v', 'i', 'h' };
+        public byte[] fcc = new byte[]{'a', 'v', 'i', 'h'};
         public int cb = 56;
         public int dwMicroSecPerFrame = 0; // (1
         // /
@@ -286,9 +276,7 @@ public class MjpegFileWriter implements AutoCloseable {
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(cb)));
+            ByteArrayOutputStream baos = createByteArrayOutputStreamWriteFCCWriteSwapInt(fcc, cb);
             baos.write(intBytes(swapInt(dwMicroSecPerFrame)));
             baos.write(intBytes(swapInt(dwMaxBytesPerSec)));
             baos.write(intBytes(swapInt(dwPaddingGranularity)));
@@ -308,6 +296,15 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
+    public static byte[] baosWrite(byte[] byteSet1, byte[] byteSet2, int size) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(byteSet1);
+        baos.write(intBytes(swapInt(size)));
+        baos.write(byteSet2);
+
+        return baos.toByteArray();
+    }
+
     private class AVIStreamList {
 
         public byte[] fcc = new byte[] { 'L', 'I', 'S', 'T' };
@@ -315,22 +312,30 @@ public class MjpegFileWriter implements AutoCloseable {
         public byte[] fcc2 = new byte[] { 's', 't', 'r', 'l' };
 
         public AVIStreamList() {
+            throw new UnsupportedOperationException("AVIStreamList constructor is not supported.");
         }
 
         public byte[] toBytes() throws IOException {
-            return toBytesInternal(fcc2);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            baos.write(fcc);
+            baos.write(intBytes(swapInt(size)));
+            baos.write(fcc2);
+
+            return baos.toByteArray();
         }
     }
 
     private class AVIStreamHeader {
         /*
-         * FOURCC fcc; DWORD cb; FOURCC fccType; FOURCC fccHandler; DWORD dwFlags; WORD wPriority; WORD
-         * wLanguage; DWORD dwInitialFrames; DWORD dwScale; DWORD dwRate; DWORD dwStart; DWORD dwLength; DWORD
-         * dwSuggestedBufferSize; DWORD dwQuality; DWORD dwSampleSize; struct { short int left; short int top;
-         * short int right; short int bottom; } rcFrame;
+         * FOURCC fcc; DWORD cb; FOURCC fccType; FOURCC fccHandler; DWORD
+         * dwFlags; WORD wPriority; WORD wLanguage; DWORD dwInitialFrames; DWORD
+         * dwScale; DWORD dwRate; DWORD dwStart; DWORD dwLength; DWORD
+         * dwSuggestedBufferSize; DWORD dwQuality; DWORD dwSampleSize; struct {
+         * short int left; short int top; short int right; short int bottom; }
+         * rcFrame;
          */
 
-        public byte[] fcc = new byte[] { 's', 't', 'r', 'h' };
+        public byte[] fcc = new byte[]{'s', 't', 'r', 'h'};
         public int cb = 64;
         public byte[] fccType = new byte[] { 'v', 'i', 'd', 's' };
         public byte[] fccHandler = new byte[] { 'M', 'J', 'P', 'G' };
@@ -364,9 +369,7 @@ public class MjpegFileWriter implements AutoCloseable {
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(cb)));
+            ByteArrayOutputStream baos = createByteArrayOutputStreamWriteFCCWriteSwapInt(fcc, cb);
             baos.write(fccType);
             baos.write(fccHandler);
             baos.write(intBytes(swapInt(dwFlags)));
@@ -387,6 +390,13 @@ public class MjpegFileWriter implements AutoCloseable {
 
             return baos.toByteArray();
         }
+    }
+
+    public ByteArrayOutputStream createByteArrayOutputStreamWriteFCCWriteSwapInt(byte[] fcc, int intToSwap) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(fcc);
+        baos.write(intBytes(swapInt(intToSwap)));
+        return baos;
     }
 
     private class AVIStreamFormat {
@@ -473,6 +483,7 @@ public class MjpegFileWriter implements AutoCloseable {
         public List<AVIIndex> ind = new ArrayList<>();
 
         public AVIIndexList() {
+            throw new UnsupportedOperationException("AVIIndexList constructor is not supported.");
         }
 
         @SuppressWarnings("unused")
@@ -518,25 +529,20 @@ public class MjpegFileWriter implements AutoCloseable {
 
     private static class AVIJunk {
 
-        public static final byte[] fcc = new byte[] { 'J', 'U', 'N', 'K' };
-        public static final int size = 1808;
-        public static final byte[] data = new byte[size];
+        public byte[] fcc = new byte[]{'J', 'U', 'N', 'K'};
+        public int size = 1808;
+        public byte[] data = new byte[size];
 
         public AVIJunk() {
             Arrays.fill(data, (byte) 0);
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(size)));
-            baos.write(data);
-
-            return baos.toByteArray();
+            return baosWrite(fcc, data, size);
         }
     }
 
-    public byte[] writeImageToBytes(Image image, float quality) throws Exception {
+    public byte[] writeImageToBytes(Image image, float quality) throws IOException {
         BufferedImage bi;
         if (image instanceof BufferedImage
                 && ((BufferedImage) image).getType() == BufferedImage.TYPE_INT_RGB) {
