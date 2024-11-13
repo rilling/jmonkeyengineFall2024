@@ -63,6 +63,10 @@ public class RendererUtil {
      * {@link RendererUtil#ENABLE_ERROR_CHECKING}.
      */
     public static void checkGLErrorForced() {
+        checkAndThrowGLError();
+    }
+
+    private static void checkAndThrowGLError() {
         int error = GLES20.glGetError();
         if (error != 0) {
             String message = GLU.gluErrorString(error);

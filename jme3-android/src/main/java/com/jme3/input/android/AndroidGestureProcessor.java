@@ -95,8 +95,12 @@ public class AndroidGestureProcessor implements
     private void pressEventHandler(MotionEvent event, TouchEvent.Type eventType) {
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
+        prepareTouchEvent(TouchEvent.Type.LONGPRESSED, event, jmeX, jmeY);
+    }
+
+    private void prepareTouchEvent(TouchEvent.Type eventType, MotionEvent event, float x, float y) {
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(eventType, jmeX, jmeY, 0, 0);
+        touchEvent.set(eventType, x, y, 0, 0);
         touchEvent.setPointerId(touchInput.getPointerId(event));
         touchEvent.setTime(event.getEventTime());
         touchEvent.setPressure(event.getPressure());
