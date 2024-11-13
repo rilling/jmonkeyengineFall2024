@@ -91,7 +91,7 @@ public class AndroidLocator implements AssetLocator {
         private InputStream in;
         private final String assetPath;
         private int resourceId;
-
+        private static final String AssetOpenError="Failed to open asset";
         AndroidAssetInfo(AssetManager assetManager, AssetKey<?> key, String assetPath, InputStream in, int resourceId) {
             super(assetManager, key);
             this.assetPath = assetPath;
