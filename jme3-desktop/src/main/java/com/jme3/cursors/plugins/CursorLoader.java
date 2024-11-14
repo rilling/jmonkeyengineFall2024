@@ -275,6 +275,7 @@ public class CursorLoader implements AssetLoader {
         int deLength = 16; // directory entry length
         int bmihLength = 40; // BITMAPINFOHEADER length
 
+
         if (icoImage[2] != 1 && icoImage[2] != 2 || icoImage[3] != 0) {
             throw new IllegalArgumentException("Bad data in ICO/CUR file. ImageType has to be either 1 or 2.");
         }
