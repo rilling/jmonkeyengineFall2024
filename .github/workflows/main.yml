@@ -46,9 +46,11 @@ on:
   push:
     branches:
       - master
+      - caseStudy2Version2
   pull_request:
     branches:
       - master
+      - caseStudy2Version2
   release:
     types: [published]
 
