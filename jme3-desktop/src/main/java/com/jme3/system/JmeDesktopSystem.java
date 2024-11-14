@@ -142,6 +142,8 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         return null;
     }
 
+    String className;
+
     public JmeContext createContext(String contextClassName, String classpathMessage) {
     	return createContext(contextClassName);
     	
@@ -155,7 +157,9 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
 
     @SuppressWarnings("unchecked")
     private JmeContext newContextCustom(AppSettings settings, JmeContext.Type type) {
-    	return createContext(className);
+
+
+        return createContext(className);
     }
 
     @Override
@@ -184,6 +188,8 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         return ctx;
     }
 
+
+
     @SuppressWarnings("unchecked")
     private <T> T newObject(String className) {
         try {
@@ -198,6 +204,14 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
             logger.log(Level.SEVERE, "Failed to create context", ex);
         }
 
+        return null;
+    }
+
+    private JmeContext newContextJogl(AppSettings settings, Type contextType) {
+        return null;
+    }
+
+    private JmeContext newContextLwjgl(AppSettings settings, Type contextType) {
         return null;
     }
 
@@ -231,16 +245,7 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
 
     @Override
     public void initialize(AppSettings settings) {
-        if (initialized) {
-            return;
-        }
-        initialized = true;
-        logger.log(Level.INFO, getBuildInfo());
-        if (!lowPermissions) {
-            if (NativeLibraryLoader.isUsingNativeBullet()) {
-                NativeLibraryLoader.loadNativeLibrary(NativeLibraries.BulletJme.getName(), true);
-            }
-        }
+        
     }
 
     @Override
