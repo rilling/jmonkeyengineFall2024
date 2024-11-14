@@ -243,6 +243,8 @@ public class JmeDesktopSystem extends JmeSystemDelegate {
         return new ALAudioRenderer(al, alc, efx);
     }
 
+    
+
     @Override
     public void initialize(AppSettings settings) {
         
