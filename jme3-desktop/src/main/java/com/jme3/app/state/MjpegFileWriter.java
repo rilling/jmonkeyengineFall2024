@@ -101,11 +101,11 @@ public class MjpegFileWriter implements AutoCloseable {
         position = (long) headerBytes.length + listBytes.length;
     }
 
-    public void addImage(Image image) throws IOException {
+    public void addImage(Image image) throws Exception {
         addImage(image, 0.8f);
     }
 
-    public void addImage(Image image, float quality) throws IOException {
+    public void addImage(Image image, float quality) throws Exception {
         addImage(writeImageToBytes(image, quality));
     }
 
