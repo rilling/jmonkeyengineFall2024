@@ -47,6 +47,8 @@ import java.net.URL;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Kirill Vainer
@@ -55,6 +57,8 @@ public class AppletHarness extends Applet {
 
     protected static final HashMap<LegacyApplication, Applet> appToApplet
                          = new HashMap<LegacyApplication, Applet>();
+
+    private static final Logger LOGGER = Logger.getLogger(AppletHarness.class.getName());
 
     protected JmeCanvasContext context;
     protected Canvas canvas;
@@ -87,7 +91,7 @@ public class AppletHarness extends Applet {
                                                   + ex.getMessage(),
                                               "jME3 Applet",
                                               JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "An error has occurred while loading applet configuration");
             } finally {
                 if (in != null)
                     try {
@@ -115,7 +119,7 @@ public class AppletHarness extends Applet {
                 | NoSuchMethodException
                 | IllegalArgumentException
                 | InvocationTargetException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception occured while instantiating " + appClass, ex);
         }
 
         appToApplet.put(app, this);
