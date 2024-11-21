@@ -195,6 +195,16 @@ public class VideoRecorderAppState extends AbstractAppState {
         lastViewPort.removeProcessor(processor);
         app.setTimer(oldTimer);
         initialized = false;
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        initialized = false;
         file = null;
         super.cleanup();
     }
