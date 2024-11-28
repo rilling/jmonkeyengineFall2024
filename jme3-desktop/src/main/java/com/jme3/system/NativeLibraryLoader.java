@@ -408,12 +408,7 @@ public final class NativeLibraryLoader {
             return;
         }
 
-        String loadedAsFileName;
-        if (library.getExtractedAsName() != null) {
-            loadedAsFileName = library.getExtractedAsName();
-        } else {
-            loadedAsFileName = Paths.get(pathInJar).getFileName().toString();
-        }
+        String loadedAsFileName= getLoadedFileName(library, pathInJar);
         
         URLConnection conn = url.openConnection();
 
@@ -481,13 +476,7 @@ public final class NativeLibraryLoader {
         
         // The library has been found and is ready to be extracted.
         // Determine what filename it should be extracted as.
-        String loadedAsFileName;
-        if (library.getExtractedAsName() != null) {
-            loadedAsFileName = library.getExtractedAsName();
-        } else {
-            // Just use the original filename as it is in the JAR.
-            loadedAsFileName = Paths.get(pathInJar).getFileName().toString();
-        }
+        String loadedAsFileName= getLoadedFileName(library, pathInJar);
         
         File extractionDirectory = getExtractionFolder();
         URLConnection conn;
@@ -563,4 +552,12 @@ public final class NativeLibraryLoader {
         // a newer version of library, downgraded to an older version
         // which will make above check invalid and extract it again.
     }
+    private static String getLoadedFileName(NativeLibrary library, String pathInJar) {
+        if (library.getExtractedAsName() != null) {
+            return library.getExtractedAsName();
+        } else {
+            return Paths.get(pathInJar).getFileName().toString();
+        }
+    }
+    
 }

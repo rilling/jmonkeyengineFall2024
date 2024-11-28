@@ -63,6 +63,10 @@ public class RendererUtil {
      * {@link RendererUtil#ENABLE_ERROR_CHECKING}.
      */
     public static void checkGLErrorForced() {
+        checkAndThrowGLError();
+    }
+
+    private static void checkAndThrowGLError() {
         int error = GLES20.glGetError();
         if (error != 0) {
             String message = GLU.gluErrorString(error);
@@ -153,14 +157,6 @@ public class RendererUtil {
         if (!ENABLE_ERROR_CHECKING) {
             return;
         }
-        int error = GLES20.glGetError();
-        if (error != 0) {
-            String message = GLU.gluErrorString(error);
-            if (message == null) {
-                throw new RendererException("An unknown OpenGL error has occurred.");
-            } else {
-                throw new RendererException("An OpenGL error has occurred: " + message);
-            }
-        }
+        checkAndThrowGLError();
     }
 }
