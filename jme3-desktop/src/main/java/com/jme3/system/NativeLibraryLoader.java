@@ -325,12 +325,17 @@ public final class NativeLibraryLoader {
 
         // Validate the target directory path
         Path targetPath = targetDir.toPath().normalize(); // Normalize to resolve ".." or "."
-
-        // Proceed with extracting native libraries if validation passes
+        if (!targetPath.startsWith(baseDir.toPath())) {
+            throw new SecurityException("Path traversal attempt detected: " + targetDir.getPath());
+        }
+            // Proceed with extracting native libraries if validation passes
         for (Map.Entry<NativeLibrary.Key, NativeLibrary> lib : nativeLibraryMap.entrySet()) {
             if (lib.getValue().getPlatform() == platform) {
                 if (!targetDir.exists()) {
                     boolean dirsCreated = targetDir.mkdirs();
+                    if (!dirsCreated) {
+                        throw new IOException("Failed to create target directory: " + targetDir.getPath());
+                    }
                 }
                 extractNativeLibrary(platform, lib.getValue().getName(), targetDir);
             }
