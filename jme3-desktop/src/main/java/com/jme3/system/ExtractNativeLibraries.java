@@ -68,11 +68,6 @@ public class ExtractNativeLibraries {
         String path = args[1].replace('/', File.separatorChar);
         File folder = new File(path);
         try {
-            File canonicalFolder = folder.getCanonicalFile();
-            if (!canonicalFolder.getPath().startsWith(folder.getAbsolutePath())) {
-                System.err.println("Invalid extraction path: Path traversal attempt detected.");
-                System.exit(2);
-            }
             if ("Windows32".equals(args[0])) {
                 NativeLibraryLoader.extractNativeLibraries(Platform.Windows32, folder);
             } else if ("Windows64".equals(args[0])) {
@@ -82,7 +77,7 @@ public class ExtractNativeLibraries {
             } else if ("Linux64".equals(args[0])) {
                 NativeLibraryLoader.extractNativeLibraries(Platform.Linux64, folder);
             } else if ("MacOSX32".equals(args[0])) {
-                NativeLibraryLoader.extractNativeLibraries(Platform.MacOSX32, canonicalFolder);
+                NativeLibraryLoader.extractNativeLibraries(Platform.MacOSX32, folder);
             } else if ("MacOSX64".equals(args[0])) {
                 NativeLibraryLoader.extractNativeLibraries(Platform.MacOSX64, folder);
             } else {

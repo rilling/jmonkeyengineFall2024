@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.nio.file.Path;
 
 import com.jme3.util.res.Resources;
 
@@ -320,18 +319,11 @@ public final class NativeLibraryLoader {
     }
     
     public static void extractNativeLibraries(Platform platform, File targetDir) throws IOException {
-        Path trustedBaseDir = Paths.get("/trusted/extraction/directory");
-        Path targetDirPath = targetDir.toPath().normalize();
-
-        if (!targetDirPath.startsWith(trustedBaseDir)) {
-            throw new SecurityException("Unauthorized extraction attempt to directory: " + targetDir.getAbsolutePath());
-        }
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
-        }
-
         for (Map.Entry<NativeLibrary.Key, NativeLibrary> lib : nativeLibraryMap.entrySet()) {
             if (lib.getValue().getPlatform() == platform) {
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
+                }
                 extractNativeLibrary(platform, lib.getValue().getName(), targetDir);
             }
         }
