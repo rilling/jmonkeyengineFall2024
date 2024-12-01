@@ -165,18 +165,18 @@ public class JmeAndroidSystem extends JmeSystemDelegate {
                 //   so the files can be copied to the PC (i.e. screenshots)
                 storageFolder = storageFolders.get(type);
                 if (storageFolder == null) {
-                    String state = Environment.getExternalStorageState();
-                    logger.log(Level.FINE, "ExternalStorageState: {0}", state);
-                    if (state.equals(Environment.MEDIA_MOUNTED)) {
-                        storageFolder = view.getContext().getExternalFilesDir(null);
+                    // Instead of accessing external storage, use internal storage
+                    storageFolder = view.getContext().getFilesDir(); // This accesses the internal storage directory
+                    if (storageFolder != null && storageFolder.exists() && storageFolder.isDirectory()) {
                         storageFolders.put(type, storageFolder);
+                    } else {
+                        logger.log(Level.WARNING, "Internal storage folder is not valid or accessible: {0}", storageFolder);
                     }
                 }
                 break;
             default:
                 break;
-        }
-        if (logger.isLoggable(Level.FINE)) {
+        }        if (logger.isLoggable(Level.FINE)) {
             if (storageFolder != null) {
                 logger.log(Level.FINE, "Base Storage Folder Path: {0}", storageFolder.getAbsolutePath());
             } else {
