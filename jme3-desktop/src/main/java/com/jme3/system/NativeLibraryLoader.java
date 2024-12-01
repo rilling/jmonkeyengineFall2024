@@ -467,9 +467,11 @@ public final class NativeLibraryLoader {
                         "The required native library '" + library.getName() + "'"
                                 + " was not found in the classpath via '" + pathInJar);
             } else if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "The optional native library ''{0}''" +
-                                " was not found in the classpath via ''{1}''.",
-                        new Object[]{library.getName(), pathInJar});
+                logger.log(Level.FINE,
+                        "The optional native library ''{0}''"
+                                + " was not found in the classpath via ''{1}''.",
+                        new Object[] { library.getName().replaceAll("[\\r\\n]", ""),
+                                pathInJar.replaceAll("[\\r\\n]", "") });
             }
             return;
         }
