@@ -155,7 +155,8 @@ public class NativeVorbisLoader implements AssetLoader {
             try {
                 afd.close();
             } catch (IOException e) {
-                e.printStackTrace(); // handle or log exception appropriately
+                System.out.println("Error closing resources "+e.getClass());//can be logged with a logger
+                //e.printStackTrace(); // handle or log exception appropriately
             }
         }
     }
