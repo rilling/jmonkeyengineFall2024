@@ -70,8 +70,6 @@ public class AndroidGestureProcessor implements
         // so we don't create an event.
         // However, reset the scaleInProgress here since this is the beginning
         // of a series of gesture events.
-//        logger.log(Level.INFO, "onDown pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         gestureDownX = touchInput.getJmeX(event.getX());
         gestureDownY = touchInput.invertY(touchInput.getJmeY(event.getY()));
         return true;
@@ -81,33 +79,26 @@ public class AndroidGestureProcessor implements
     public boolean onSingleTapUp(MotionEvent event) {
         // Up of single tap.  May be followed by a double tap later.
         // use onSingleTapConfirmed instead.
-//        logger.log(Level.INFO, "onSingleTapUp pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         return true;
     }
 
     @Override
     public void onShowPress(MotionEvent event) {
-//        logger.log(Level.INFO, "onShowPress pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
-        TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(TouchEvent.Type.SHOWPRESS, jmeX, jmeY, 0, 0);
-        touchEvent.setPointerId(touchInput.getPointerId(event));
-        touchEvent.setTime(event.getEventTime());
-        touchEvent.setPressure(event.getPressure());
-        touchInput.addEvent(touchEvent);
+        prepareTouchEvent(TouchEvent.Type.SHOWPRESS, event, jmeX, jmeY);
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
-//        logger.log(Level.INFO, "onLongPress pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
+        prepareTouchEvent(TouchEvent.Type.LONGPRESSED, event, jmeX, jmeY);
+    }
+
+    private void prepareTouchEvent(TouchEvent.Type eventType, MotionEvent event, float x, float y) {
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(TouchEvent.Type.LONGPRESSED, jmeX, jmeY, 0, 0);
+        touchEvent.set(eventType, x, y, 0, 0);
         touchEvent.setPointerId(touchInput.getPointerId(event));
         touchEvent.setTime(event.getEventTime());
         touchEvent.setPressure(event.getPressure());
@@ -124,8 +115,6 @@ public class AndroidGestureProcessor implements
         // Negate distX to get the real value, but leave distY negative to compensate
         // for the fact that jME has y=0 at bottom where Android has y=0 at top.
         if (!touchInput.getScaleDetector().isInProgress()) {
-//            logger.log(Level.INFO, "onScroll pointerId: {0}, startAction: {1}, startX: {2}, startY: {3}, endAction: {4}, endX: {5}, endY: {6}, dx: {7}, dy: {8}",
-//                    new Object[]{touchInput.getPointerId(startEvent), touchInput.getAction(startEvent), startEvent.getX(), startEvent.getY(), touchInput.getAction(endEvent), endEvent.getX(), endEvent.getY(), distX, distY});
 
             float jmeX = touchInput.getJmeX(endEvent.getX());
             float jmeY = touchInput.invertY(touchInput.getJmeY(endEvent.getY()));
@@ -146,9 +135,6 @@ public class AndroidGestureProcessor implements
         // Therefore, the dX and dY values are actually velocity instead of distance values
         // Since this does not track the movement, use the start position and velocity values.
 
-//        logger.log(Level.INFO, "onFling pointerId: {0}, startAction: {1}, startX: {2}, startY: {3}, endAction: {4}, endX: {5}, endY: {6}, velocityX: {7}, velocityY: {8}",
-//                new Object[]{touchInput.getPointerId(startEvent), touchInput.getAction(startEvent), startEvent.getX(), startEvent.getY(), touchInput.getAction(endEvent), endEvent.getX(), endEvent.getY(), velocityX, velocityY});
-
         float jmeX = touchInput.getJmeX(startEvent.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(startEvent.getY()));
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
@@ -165,8 +151,6 @@ public class AndroidGestureProcessor implements
     @Override
     public boolean onSingleTapConfirmed(MotionEvent event) {
         // Up of single tap when no double tap followed.
-//        logger.log(Level.INFO, "onSingleTapConfirmed pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
@@ -183,8 +167,6 @@ public class AndroidGestureProcessor implements
         //The down motion event of the first tap of the double-tap
         // We could use this event to fire off a double tap event, or use
         // DoubleTapEvent with a check for the UP action
-//        logger.log(Level.INFO, "onDoubleTap pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
@@ -200,8 +182,6 @@ public class AndroidGestureProcessor implements
     public boolean onDoubleTapEvent(MotionEvent event) {
         //Notified when an event within a double-tap gesture occurs, including the down, move(s), and up events.
         // this means it will get called multiple times for a single double tap
-//        logger.log(Level.INFO, "onDoubleTapEvent pointerId: {0}, action: {1}, x: {2}, y: {3}",
-//                new Object[]{touchInput.getPointerId(event), touchInput.getAction(event), event.getX(), event.getY()});
         if (touchInput.getAction(event) == MotionEvent.ACTION_UP) {
             TouchEvent touchEvent = touchInput.getFreeTouchEvent();
             touchEvent.set(TouchEvent.Type.DOUBLETAP, event.getX(), touchInput.invertY(event.getY()), 0, 0);
@@ -221,7 +201,6 @@ public class AndroidGestureProcessor implements
         // of the fingers.  Therefore, use the x and y values from the Down event
         // so that the x and y values don't jump to the middle position.
         // return true or all gestures for this beginning event will be discarded
-//        logger.log(Level.INFO, "onScaleBegin");
         scaleStartX = gestureDownX;
         scaleStartY = gestureDownY;
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
@@ -240,7 +219,6 @@ public class AndroidGestureProcessor implements
     @Override
     public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
         // return true or all gestures for this event will be accumulated
-//        logger.log(Level.INFO, "onScale");
         scaleStartX = gestureDownX;
         scaleStartY = gestureDownY;
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
@@ -257,7 +235,6 @@ public class AndroidGestureProcessor implements
 
     @Override
     public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
-//        logger.log(Level.INFO, "onScaleEnd");
         scaleStartX = gestureDownX;
         scaleStartY = gestureDownY;
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();

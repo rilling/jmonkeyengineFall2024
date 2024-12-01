@@ -53,7 +53,7 @@ import javax.swing.SwingUtilities;
  */
 public class AppletHarness extends Applet {
 
-    public static final HashMap<LegacyApplication, Applet> appToApplet
+    protected static final HashMap<LegacyApplication, Applet> appToApplet
                          = new HashMap<LegacyApplication, Applet>();
 
     protected JmeCanvasContext context;

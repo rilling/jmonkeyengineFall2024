@@ -355,6 +355,9 @@ public class VideoRecorderAppState extends AbstractAppState {
                 try {
                     Thread.sleep(difference);
                 } catch (InterruptedException ex) {
+                    // Re-interrupt the thread
+                    Thread.currentThread().interrupt(); // Preserve the interrupt status
+                    // Optional: Log or perform any necessary cleanup
                 }
             }
             this.ticks++;

@@ -130,7 +130,6 @@ public class MjpegFileWriter implements AutoCloseable {
         }
         byte[] data = baos.toByteArray();
         aviOutput.write(data);
-
         numFrames++; //add a frame
         position += data.length;
     }
@@ -278,6 +277,15 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
+    public static byte[] baosWrite(byte[] byteSet1, byte[] byteSet2, int size) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(byteSet1);
+        baos.write(intBytes(swapInt(size)));
+        baos.write(byteSet2);
+
+        return baos.toByteArray();
+    }
+
     private class AVIStreamList {
 
         public byte[] fcc = new byte[]{'L', 'I', 'S', 'T'};
@@ -289,25 +297,12 @@ public class MjpegFileWriter implements AutoCloseable {
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(size)));
-            baos.write(fcc2);
-
-            return baos.toByteArray();
+            return baosWrite(fcc, fcc2, size);
         }
     }
 
     private class AVIStreamHeader {
-        /*
-         * FOURCC fcc; DWORD cb; FOURCC fccType; FOURCC fccHandler; DWORD
-         * dwFlags; WORD wPriority; WORD wLanguage; DWORD dwInitialFrames; DWORD
-         * dwScale; DWORD dwRate; DWORD dwStart; DWORD dwLength; DWORD
-         * dwSuggestedBufferSize; DWORD dwQuality; DWORD dwSampleSize; struct {
-         * short int left; short int top; short int right; short int bottom; }
-         * rcFrame;
-         */
-
+    
         public byte[] fcc = new byte[]{'s', 't', 'r', 'h'};
         public int cb = 64;
         public byte[] fccType = new byte[]{'v', 'i', 'd', 's'};
@@ -502,23 +497,17 @@ public class MjpegFileWriter implements AutoCloseable {
         }
     }
 
-    private class AVIJunk {
+    private static class AVIJunk {
 
-        public byte[] fcc = new byte[]{'J', 'U', 'N', 'K'};
-        public int size = 1808;
-        public byte[] data = new byte[size];
-
+        public static final byte[] fcc = new byte[] { 'J', 'U', 'N', 'K' };
+        public static final int size = 1808;
+        public static final byte[] data = new byte[size];
         public AVIJunk() {
             Arrays.fill(data, (byte) 0);
         }
 
         public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(fcc);
-            baos.write(intBytes(swapInt(size)));
-            baos.write(data);
-
-            return baos.toByteArray();
+            return baosWrite(fcc, data, size);
         }
     }
 
