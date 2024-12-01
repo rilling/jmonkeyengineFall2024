@@ -542,7 +542,11 @@ public class MjpegFileWriter implements AutoCloseable {
         } else {
             bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = bi.createGraphics();
-            g.drawImage(image, 0, 0, width, height, null);
+            try {
+                g.drawImage(image, 0, 0, width, height, null);
+            } finally {
+                g.dispose();
+            }
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
