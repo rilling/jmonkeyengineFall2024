@@ -42,9 +42,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-
 
 /**
  *  A straight forward socket-based connector implementation that
@@ -72,16 +69,8 @@ public class SocketConnector implements Connector
         // put it there.
         sock.setTcpNoDelay(true);
         
-        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket sslSocket = (SSLSocket) factory.createSocket(address, port);
-        
-        sslSocket.setEnabledProtocols(new String[]{"TLSv1.2", "TLSv1.3"});
-        
-        // Start SSL handshake
-        sslSocket.startHandshake();
-        
-        in = sslSocket.getInputStream();
-        out = sslSocket.getOutputStream();
+        in = sock.getInputStream();
+        out = sock.getOutputStream();
         
         connected.set(true);
     }
