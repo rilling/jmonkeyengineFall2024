@@ -60,6 +60,8 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.SystemListener;
 import com.jme3.system.android.JmeAndroidSystem;
 import com.jme3.system.android.OGLESContext;
+import com.sun.org.slf4j.internal.LoggerFactory;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Level;
@@ -114,6 +116,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
     /*extra messages/data*/
     private String crashLog = "";
     private String glEsVersion = "";
+    private static final Logger logger = LoggerFactory.getLogger(JmeSurfaceView.class);
 
     /**
      * Instantiates a default surface view holder without XML attributes.
@@ -248,8 +251,13 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
 
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
-        throwable.printStackTrace();
+        // Log the error with its message
+        logger.error("An error occurred: {}", errorMsg, throwable);
+
+        // Optionally show an error dialog
         showErrorDialog(throwable, throwable.getClass().getName());
+
+        // Invoke the callback if present
         if (onExceptionThrown != null) {
             onExceptionThrown.onExceptionThrown(throwable);
         }
