@@ -474,15 +474,32 @@ public final class NativeLibraryLoader {
         if (pathInJar == null) {
             return;
         }
-        
+
         URL url = Resources.getResource(pathInJar);
         if (url == null) {
             return;
         }
 
-        String loadedAsFileName= getLoadedFileName(library, pathInJar);
-        
-        URLConnection conn = url.openConnection();
+        String loadedAsFileName = getLoadedFileName(library, pathInJar);
+        URLConnection conn = null;
+        try {
+
+            conn = url.openConnection();
+
+
+            conn.addRequestProperty("User-Agent", "application/json");
+            conn.addRequestProperty("Authorization", "application/json");
+            conn.addRequestProperty("Accept", "application/json");
+            conn.addRequestProperty("Content-Type", "application/json");
+            conn.addRequestProperty("X-Custom-Header", "application/json");
+
+            conn.connect();
+
+            System.out.println("Request sent successfully with headers.");
+        } catch (IOException e) {
+            // Handle exceptions (e.g., connection issues, timeout, etc.)
+            System.err.println("Error occurred while making the request: " + e.getMessage());
+        }
 
         File targetFile = new File(targetDir, loadedAsFileName);
 
