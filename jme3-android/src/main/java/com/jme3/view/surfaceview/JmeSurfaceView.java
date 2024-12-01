@@ -116,7 +116,6 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
     /*extra messages/data*/
     private String crashLog = "";
     private String glEsVersion = "";
-    private static final Logger logger = LoggerFactory.getLogger(JmeSurfaceView.class);
 
     /**
      * Instantiates a default surface view holder without XML attributes.
@@ -252,7 +251,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
         // Log the error with its message
-        logger.error("An error occurred: {}", errorMsg, throwable);
+        System.out.println("Error closing resources "+errorMsg.getClass());//can be logged with a logger
 
         // Optionally show an error dialog
         showErrorDialog(throwable, throwable.getClass().getName());
