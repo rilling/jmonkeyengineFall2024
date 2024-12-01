@@ -47,6 +47,12 @@ import java.util.logging.Logger;
 
 import com.jme3.util.res.Resources;
 
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  * Utility class to register, extract, and load native libraries.
  * <br>
@@ -275,11 +281,14 @@ public final class NativeLibraryLoader {
     }
 
     private static int computeNativesHash() {
-        URLConnection conn = null;
-        String classpath = System.getProperty("java.class.path");
-        URL url = Resources.getResource("com/jme3/system/NativeLibraryLoader.class");
 
+        String classpath = System.getProperty("java.class.path");
+
+
+        HttpURLConnection conn = null;
+        URL url;
         try {
+            url = null;
             StringBuilder sb = new StringBuilder(url.toString());
             if (sb.indexOf("jar:") == 0) {
                 sb.delete(0, 4);
@@ -292,18 +301,68 @@ public final class NativeLibraryLoader {
                 throw new UnsupportedOperationException(ex);
             }
 
-            conn = url.openConnection();
+            String urlString = "com/jme3/system/NativeLibraryLoader.class";
+            conn = null;
+
+            try {
+
+                url = new URL(urlString);
+
+
+                conn = (HttpURLConnection) url.openConnection();
+
+
+                conn.setRequestMethod("GET");
+
+
+                conn.setRequestProperty("User-Agent", "application/json");
+                conn.setRequestProperty("Authorization", "application/json");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+
+
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+
+
+                int responseCode = conn.getResponseCode();
+
+
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                        String inputLine;
+                        StringBuilder response = new StringBuilder();
+
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+
+
+                        System.out.println("Response: " + response.toString());
+                    }
+                } else {
+
+                    System.out.println("Failed to connect. HTTP response code: " + responseCode);
+                }
+            } catch (IOException e) {
+
+                System.out.println("Error while making the connection: " + e.getMessage());
+            } finally {
+
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
             int hash = classpath.hashCode() ^ (int) conn.getLastModified();
             return hash;
-        } catch (IOException ex) {
-            throw new UncheckedIOException("Failed to open file: '" + url
-                    + "'. Error: " + ex, ex);
         } finally {
             if (conn != null) {
                 try {
                     conn.getInputStream().close();
                     conn.getOutputStream().close();
-                } catch (IOException ex) { }
+                } catch (IOException ex) {
+                }
             }
         }
     }
