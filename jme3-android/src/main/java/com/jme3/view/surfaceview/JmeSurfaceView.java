@@ -42,6 +42,7 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -248,7 +249,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
 
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
-        throwable.printStackTrace();
+        Log.e("JmeSurfaceView", "Error occurred: " + errorMsg, throwable);
         showErrorDialog(throwable, throwable.getClass().getName());
         if (onExceptionThrown != null) {
             onExceptionThrown.onExceptionThrown(throwable);
