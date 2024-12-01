@@ -44,7 +44,6 @@ import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
-
 /**
  * Part of the jME XML IO system as introduced in the Google Code jmexml project.
  * @author Kai Rabien (hevee) - original author of the code.google.com jmexml project
@@ -58,6 +57,7 @@ public class XMLImporter implements JmeImporter {
     
     public XMLImporter() {
     }
+
 
     @Override
     public int getFormatVersion() {
@@ -98,10 +98,22 @@ public class XMLImporter implements JmeImporter {
 
     public Savable load(InputStream f) throws IOException {
         try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            // Disable access to external entities to prevent XXE attacks
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+            // Disable external DTDs
+            factory.setExpandEntityReferences(false);
+            factory.setNamespaceAware(true);
+
             domIn = new DOMInputCapsule(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(f), this);
             return domIn.readSavable(null, null);
         } catch (SAXException | ParserConfigurationException e) {
             IOException ex = new IOException();
+
             ex.initCause(e);
             throw ex;
         }
