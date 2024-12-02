@@ -107,7 +107,7 @@ public class AndroidInputHandler implements View.OnTouchListener, View.OnKeyList
     }
 
     public TouchInput getTouchInput() {
-        return touchInput;
+        return new AndroidTouchInput(this);
     }
 
     public JoyInput getJoyInput() {
@@ -189,7 +189,7 @@ public class AndroidInputHandler implements View.OnTouchListener, View.OnKeyList
         boolean isJoystick = ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
                 || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
 
-        boolean isUnknown = (source & InputDevice.SOURCE_UNKNOWN) == InputDevice.SOURCE_UNKNOWN;
+        boolean isUnknown = (source & InputDevice.SOURCE_UNKNOWN) != 0;  // Fixed logic here
 
         boolean consumed = false;
 
