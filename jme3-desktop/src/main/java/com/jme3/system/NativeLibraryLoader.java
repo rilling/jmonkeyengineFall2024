@@ -36,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -319,10 +320,18 @@ public final class NativeLibraryLoader {
     }
     
     public static void extractNativeLibraries(Platform platform, File targetDir) throws IOException {
+        File baseDir = new File("allowed/base/directory").getCanonicalFile();
+        Path targetPath = targetDir.toPath().normalize();
+        if (!targetPath.startsWith(baseDir.toPath())) {
+            throw new SecurityException("Path traversal attempt detected: " + targetDir.getPath());
+        }
         for (Map.Entry<NativeLibrary.Key, NativeLibrary> lib : nativeLibraryMap.entrySet()) {
             if (lib.getValue().getPlatform() == platform) {
                 if (!targetDir.exists()) {
-                    targetDir.mkdirs();
+                    boolean dirsCreated = targetDir.mkdirs();
+                    if (!dirsCreated) {
+                        throw new IOException("Failed to create target directory: " + targetDir.getPath());
+                    }
                 }
                 extractNativeLibrary(platform, lib.getValue().getName(), targetDir);
             }
