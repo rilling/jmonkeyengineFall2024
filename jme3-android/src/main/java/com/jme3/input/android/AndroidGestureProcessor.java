@@ -86,20 +86,19 @@ public class AndroidGestureProcessor implements
     public void onShowPress(MotionEvent event) {
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
-        TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(TouchEvent.Type.SHOWPRESS, jmeX, jmeY, 0, 0);
-        touchEvent.setPointerId(touchInput.getPointerId(event));
-        touchEvent.setTime(event.getEventTime());
-        touchEvent.setPressure(event.getPressure());
-        touchInput.addEvent(touchEvent);
+        prepareTouchEvent(TouchEvent.Type.SHOWPRESS, event, jmeX, jmeY);
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
+        prepareTouchEvent(TouchEvent.Type.LONGPRESSED, event, jmeX, jmeY);
+    }
+
+    private void prepareTouchEvent(TouchEvent.Type eventType, MotionEvent event, float x, float y) {
         TouchEvent touchEvent = touchInput.getFreeTouchEvent();
-        touchEvent.set(TouchEvent.Type.LONGPRESSED, jmeX, jmeY, 0, 0);
+        touchEvent.set(eventType, x, y, 0, 0);
         touchEvent.setPointerId(touchInput.getPointerId(event));
         touchEvent.setTime(event.getEventTime());
         touchEvent.setPressure(event.getPressure());
