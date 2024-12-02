@@ -47,7 +47,7 @@ import java.net.URL;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * @author Kirill Vainer
