@@ -56,7 +56,7 @@ import java.util.logging.Logger;
 public class AppletHarness extends Applet {
 
     protected static final HashMap<LegacyApplication, Applet> appToApplet
-                         = new HashMap<LegacyApplication, Applet>();
+            = new HashMap<LegacyApplication, Applet>();
 
     private static final Logger LOGGER = Logger.getLogger(AppletHarness.class.getName());
 
@@ -82,21 +82,22 @@ public class AppletHarness extends Applet {
             try {
                 in = appCfg.openStream();
                 settings.load(in);
-                in.close();
             } catch (IOException ex){
                 // Called before application has been created ....
                 // Display error message through AWT
                 JOptionPane.showMessageDialog(this, "An error has occurred while "
-                                                  + "loading applet configuration"
-                                                  + ex.getMessage(),
-                                              "jME3 Applet",
-                                              JOptionPane.ERROR_MESSAGE);
-                LOGGER.log(Level.SEVERE, "An error has occurred while loading applet configuration");
+                                + "loading applet configuration: "
+                                + ex.getMessage(),
+                        "jME3 Applet",
+                        JOptionPane.ERROR_MESSAGE);
+                LOGGER.log(Level.SEVERE, "An error occurred while loading applet configuration", ex);
             } finally {
-                if (in != null)
+                if (in != null) {
                     try {
-                    in.close();
-                } catch (IOException ex) {
+                        in.close();
+                    } catch (IOException ex) {
+                        LOGGER.log(Level.WARNING, "Error closing input stream", ex);
+                    }
                 }
             }
         }
@@ -110,16 +111,16 @@ public class AppletHarness extends Applet {
 
         JmeSystem.setLowPermissions(true);
 
-        try{
-            Class clazz = Class.forName(appClass);
+        try {
+            Class<?> clazz = Class.forName(appClass);
             app = (LegacyApplication) clazz.getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException
-                | InstantiationException
-                | IllegalAccessException
-                | NoSuchMethodException
-                | IllegalArgumentException
-                | InvocationTargetException ex) {
-            LOGGER.log(Level.SEVERE, "Exception occured while instantiating " + appClass, ex);
+                 | InstantiationException
+                 | IllegalAccessException
+                 | NoSuchMethodException
+                 | IllegalArgumentException
+                 | InvocationTargetException ex) {
+            LOGGER.log(Level.SEVERE, "Exception occurred while instantiating " + appClass, ex);
         }
 
         appToApplet.put(app, this);
@@ -148,42 +149,42 @@ public class AppletHarness extends Applet {
         try {
             appCfg = new URL(getParameter("AppSettingsURL"));
         } catch (MalformedURLException ex) {
-            System.out.println(ex.getMessage());
+            LOGGER.log(Level.WARNING, "Invalid AppSettingsURL parameter", ex);
             appCfg = null;
         }
 
         try {
             assetCfg = new URL(getParameter("AssetConfigURL"));
-        } catch (MalformedURLException ex){
-            System.out.println(ex.getMessage());
-            assetCfg = Resources.getResource("/com/jme3/asset/Desktop.cfg",this.getClass());
+        } catch (MalformedURLException ex) {
+            LOGGER.log(Level.WARNING, "Invalid AssetConfigURL parameter", ex);
+            assetCfg = Resources.getResource("/com/jme3/asset/Desktop.cfg", this.getClass());
         }
 
         createCanvas();
-        System.out.println("applet:init");
+        LOGGER.info("applet:init");
     }
 
     @Override
     public void start(){
         context.setAutoFlushFrames(true);
-        System.out.println("applet:start");
+        LOGGER.info("applet:start");
     }
 
     @Override
     public void stop(){
         context.setAutoFlushFrames(false);
-        System.out.println("applet:stop");
+        LOGGER.info("applet:stop");
     }
 
     @Override
     public void destroy(){
-        System.out.println("applet:destroyStart");
+        LOGGER.info("applet:destroyStart");
         SwingUtilities.invokeLater(() -> {
             removeAll();
-            System.out.println("applet:destroyRemoved");
+            LOGGER.info("applet:destroyRemoved");
         });
         app.stop(true);
-        System.out.println("applet:destroyDone");
+        LOGGER.info("applet:destroyDone");
 
         appToApplet.remove(app);
     }
