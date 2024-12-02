@@ -44,6 +44,16 @@ import java.util.logging.Logger;
  */
 public class ExtractNativeLibraries {
 
+    private static File validatePath(String path) throws IOException {
+        File folder = new File(path).getCanonicalFile();
+        File safeBaseDir = new File("safe-directory").getCanonicalFile();
+        // Ensure the path is within the allowed directory
+        if (!folder.toPath().startsWith(safeBaseDir.toPath())) {
+            throw new SecurityException("Invalid extraction path.");
+        }
+
+        return folder;
+    }
     public static void main(String[] args) {
         if (args.length == 1) {
             if ("getjarexcludes".equals(args[0])) {
@@ -66,7 +76,14 @@ public class ExtractNativeLibraries {
             System.exit(1);
         }
         String path = args[1].replace('/', File.separatorChar);
-        File folder = new File(path);
+        File folder;
+        try {
+            folder = validatePath(path);
+        } catch (IOException | SecurityException e) {
+            System.err.println("Invalid extraction path: " + e.getMessage());
+            System.exit(2);
+            return;
+        }
         try {
             if ("Windows32".equals(args[0])) {
                 NativeLibraryLoader.extractNativeLibraries(Platform.Windows32, folder);
