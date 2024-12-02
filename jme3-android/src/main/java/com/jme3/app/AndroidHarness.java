@@ -175,6 +175,7 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
     protected FrameLayout frameLayout = null;
 
     static final private String escapeEvent = "TouchEscape";
+
     private boolean firstDrawFrame = true;
     private boolean inConfigChange = false;
 

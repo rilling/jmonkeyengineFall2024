@@ -58,7 +58,7 @@ public class FbxNode extends FbxObject {
             String propName = (String) prop.properties.get(0);
             switch(propName) {
             case "RotationOrder":
-                rotationOrder = RotationOrder.values[(Integer) prop.properties.get(4)];
+                rotationOrder = RotationOrder.getValues()[(Integer)prop.properties.get(4)];
                 break;
             case "Lcl Translation":
                 readVectorFromProp(translationLocalRaw, prop);
