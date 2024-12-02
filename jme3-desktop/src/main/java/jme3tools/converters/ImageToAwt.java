@@ -49,7 +49,17 @@ public class ImageToAwt {
 
     private static class DecodeParams {
 
-        final int bpp, am, rm, gm, bm, as, rs, gs, bs, im, is;
+        final int bpp;
+        final int am;
+        final int rm;
+        final int gm;
+        final int bm;
+        final int as;
+        final int rs;
+        final int gs;
+        final int bs;
+        final int im;
+        final int is;
 
         public DecodeParams(int bpp, int am, int rm, int gm, int bm, int as, int rs, int gs, int bs, int im, int is) {
             this.bpp = bpp;
@@ -337,6 +347,8 @@ public class ImageToAwt {
             inRGB = true;
         }
 
+
+
         int expansionA = 8 - Integer.bitCount(inParams.am);
         int expansionR = 8 - Integer.bitCount(inParams.rm);
         int expansionG = 8 - Integer.bitCount(inParams.gm);
@@ -347,27 +359,8 @@ public class ImageToAwt {
             for (int x = 0; x < width; x++){
                 int i = Ix(x, y, width) * inParams.bpp;
                 inputPixel = (readPixel(inData, i, inParams.bpp) & inParams.im) >> inParams.is;
-                
-                int a = (inputPixel & inParams.am) >> inParams.as;
-                int r = (inputPixel & inParams.rm) >> inParams.rs;
-                int g = (inputPixel & inParams.gm) >> inParams.gs;
-                int b = (inputPixel & inParams.bm) >> inParams.bs;
 
-                r = r & 0xff;
-                g = g & 0xff;
-                b = b & 0xff;
-                a = a & 0xff;
-
-                a = a << expansionA;
-                r = r << expansionR;
-                g = g << expansionG;
-                b = b << expansionB;
-
-                if (inLum)
-                    b = g = r;
-
-                if (!inAlpha)
-                    a = 0xff;
+                int argb = extractPixelColor(inputPixel, inParams, expansionA, expansionR, expansionG, expansionB, inLum, inAlpha);
 
 //                int argb = (a << 24) | (r << 16) | (g << 8) | b;
 //                out.setRGB(x, y, argb);
@@ -457,34 +450,47 @@ public class ImageToAwt {
         for (int y = 0; y < height; y++){
             for (int x = 0; x < width; x++){
                 int i = mipPos + (Ix(x,y,width) * p.bpp);
+
                 inputPixel = (readPixel(buf,i,p.bpp) & p.im) >> p.is;
-                int a = (inputPixel & p.am) >> p.as;
-                int r = (inputPixel & p.rm) >> p.rs;
-                int g = (inputPixel & p.gm) >> p.gs;
-                int b = (inputPixel & p.bm) >> p.bs;
+                int argb = extractPixelColor(inputPixel, p, expansionA, expansionR, expansionG, expansionB, luminance, alpha);
 
-                r = r & 0xff;
-                g = g & 0xff;
-                b = b & 0xff;
-                a = a & 0xff;
-
-                a = a << expansionA;
-                r = r << expansionR;
-                g = g << expansionG;
-                b = b << expansionB;
-                
-                if (luminance)
-                    b = g = r;
-
-                if (!alpha)
-                    a = 0xff;
-
-                int argb = (a << 24) | (r << 16) | (g << 8) | b;
                 out.setRGB(x, y, argb);
             }
         }
 
         return out;
+    }
+
+    private static int extractPixelColor(int inputPixel, DecodeParams inParams, int expansionA, int expansionR, int expansionG, int expansionB, boolean inLum, boolean inAlpha) {
+        int a = (inputPixel & inParams.am) >> inParams.as;
+        int r = (inputPixel & inParams.rm) >> inParams.rs;
+        int g = (inputPixel & inParams.gm) >> inParams.gs;
+        int b = (inputPixel & inParams.bm) >> inParams.bs;
+
+        // Limit channels to 8-bit range
+        a &= 0xff;
+        r &= 0xff;
+        g &= 0xff;
+        b &= 0xff;
+
+        // Apply expansion
+        a <<= expansionA;
+        r <<= expansionR;
+        g <<= expansionG;
+        b <<= expansionB;
+
+        // Set RGB values to luminance if needed
+        if (inLum) {
+            b = g = r;
+        }
+
+        // Set alpha to full opacity if not present
+        if (!inAlpha) {
+            a = 0xff;
+        }
+
+        // Combine into ARGB format
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
 }

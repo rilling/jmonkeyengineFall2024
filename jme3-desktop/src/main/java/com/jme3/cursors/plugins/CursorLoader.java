@@ -107,7 +107,6 @@ public class CursorLoader implements AssetLoader {
             int steps = 0;
             int width = 0;
             int height = 0;
-            int flag = 0; // we don't use that.
             int[] rate = null;
             int[] animSeq = null;
             ArrayList<byte[]> icons;
@@ -127,7 +126,6 @@ public class CursorLoader implements AssetLoader {
                     nextInt = getNext(leIn);
                     while (nextInt >= 0) {
                         if (nextInt == 0x68696e61) {
-//                            System.out.println("we have 'anih' header");
                             leIn.skipBytes(8); // internal struct length (always 36)
                             numIcons = leIn.readInt();
                             steps = leIn.readInt(); // number of blits for ani cycles
@@ -135,7 +133,6 @@ public class CursorLoader implements AssetLoader {
                             height = leIn.readInt();
                             leIn.skipBytes(8);
                             jiffy = leIn.readInt();
-                            flag = leIn.readInt();
                             nextInt = leIn.readInt();
                         } else if (nextInt == 0x65746172) { // found a 'rate' of animation
 //                            System.out.println("we have 'rate'.");
@@ -274,8 +271,10 @@ public class CursorLoader implements AssetLoader {
 
         BufferedImage[] bi;
         // Check resource type field.
-        int DE_LENGTH = 16; // directory entry length
-        int BMIH_LENGTH = 40; // BITMAPINFOHEADER length
+
+        int deLength = 16; // directory entry length
+        int bmihLength = 40; // BITMAPINFOHEADER length
+
 
         if (icoImage[2] != 1 && icoImage[2] != 2 || icoImage[3] != 0) {
             throw new IllegalArgumentException("Bad data in ICO/CUR file. ImageType has to be either 1 or 2.");
@@ -288,27 +287,27 @@ public class CursorLoader implements AssetLoader {
         int[] colorCount = new int[numImages];
 
         for (int i = 0; i < numImages; i++) {
-            int width = ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH]);
+            int width = ubyte(icoImage[FDE_OFFSET + i * deLength]);
 
-            int height = ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 1]);
+            int height = ubyte(icoImage[FDE_OFFSET + i * deLength + 1]);
 
-            colorCount[i] = ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 2]);
+            colorCount[i] = ubyte(icoImage[FDE_OFFSET + i * deLength + 2]);
 
-            int bytesInRes = ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 11]);
+            int bytesInRes = ubyte(icoImage[FDE_OFFSET + i * deLength + 11]);
             bytesInRes <<= 8;
-            bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 10]);
+            bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * deLength + 10]);
             bytesInRes <<= 8;
-            bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 9]);
+            bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * deLength + 9]);
             bytesInRes <<= 8;
-            bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 8]);
+            bytesInRes |= ubyte(icoImage[FDE_OFFSET + i * deLength + 8]);
 
-            int imageOffset = ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 15]);
+            int imageOffset = ubyte(icoImage[FDE_OFFSET + i * deLength + 15]);
             imageOffset <<= 8;
-            imageOffset |= ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 14]);
+            imageOffset |= ubyte(icoImage[FDE_OFFSET + i * deLength + 14]);
             imageOffset <<= 8;
-            imageOffset |= ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 13]);
+            imageOffset |= ubyte(icoImage[FDE_OFFSET + i * deLength + 13]);
             imageOffset <<= 8;
-            imageOffset |= ubyte(icoImage[FDE_OFFSET + i * DE_LENGTH + 12]);
+            imageOffset |= ubyte(icoImage[FDE_OFFSET + i * deLength + 12]);
 
             if (icoImage[imageOffset] == 40
                     && icoImage[imageOffset + 1] == 0
@@ -370,7 +369,7 @@ public class CursorLoader implements AssetLoader {
                             colorCount[i] = (int) Math.pow(2, bitCount);
                         }
                     } else {
-                        colorCount[i] = (int) Math.pow(2, bitCount * planes);
+                        colorCount[i] = (int) Math.pow(2, (double) bitCount * planes);
                     }
                 }
 
@@ -378,7 +377,7 @@ public class CursorLoader implements AssetLoader {
 
                 // Parse image to image buffer.
 
-                int colorTableOffset = imageOffset + BMIH_LENGTH;
+                int colorTableOffset = imageOffset + bmihLength;
 
                 if (colorCount[i] == 2) {
                     int xorImageOffset = colorTableOffset + 2 * 4;
@@ -442,25 +441,7 @@ public class CursorLoader implements AssetLoader {
                                         & 15;
                             }
 
-                            int rgb = 0;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 2]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 1]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index
-                                    * 4]));
-
-                            if ((ubyte(icoImage[andImageOffset + row
-                                    * calcScanlineBytes(width, 1)
-                                    + col / 8]) & masks[col % 8])
-                                    != 0) {
-                                bi[i].setRGB(col, height - 1 - row, rgb);
-                            } else {
-                                bi[i].setRGB(col, height - 1 - row,
-                                        0xff000000 | rgb);
-                            }
+                            bi[i] = setRGBCalc(bi[i],icoImage,colorTableOffset,andImageOffset,index, row, col, height, width);
                         }
                     }
                 } else if (colorCount[i] == 256) {
@@ -477,24 +458,7 @@ public class CursorLoader implements AssetLoader {
                             index = ubyte(icoImage[xorImageOffset + row
                                     * scanlineBytes + col]);
 
-                            int rgb = 0;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 2]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4
-                                    + 1]));
-                            rgb <<= 8;
-                            rgb |= (ubyte(icoImage[colorTableOffset + index * 4]));
-
-                            if ((ubyte(icoImage[andImageOffset + row
-                                    * calcScanlineBytes(width, 1)
-                                    + col / 8]) & masks[col % 8])
-                                    != 0) {
-                                bi[i].setRGB(col, height - 1 - row, rgb);
-                            } else {
-                                bi[i].setRGB(col, height - 1 - row,
-                                        0xff000000 | rgb);
-                            }
+                            bi[i] = setRGBCalc(bi[i],icoImage,colorTableOffset,andImageOffset,index, row, col, height, width);
                         }
                     }
                 } else if (colorCount[i] == 0) {
@@ -540,6 +504,42 @@ public class CursorLoader implements AssetLoader {
         icoImage = null; // This array can now be garbage collected.
 
         return bi;
+    }
+
+    private BufferedImage setRGBCalc(BufferedImage biElement,byte[] icoImage, int colorTableOffset , int andImageOffset, int index, int row , int col, int height , int width){
+
+        int rgb = 0;
+
+        int[] masks = {128, 64, 32, 16, 8, 4, 2, 1};
+
+        rgb = getRGB(icoImage, colorTableOffset, index);
+
+        if ((ubyte(icoImage[andImageOffset + row
+                * calcScanlineBytes(width, 1)
+                + col / 8]) & masks[col % 8])
+                != 0) {
+            biElement.setRGB(col, height - 1 - row, rgb);
+        } else {
+            biElement.setRGB(col, height - 1 - row,
+                    0xff000000 | rgb);
+        }
+
+        return biElement;
+
+    }
+    private int getRGB(byte[] icoImage, int colorTableOffset, int index) {
+
+        int rgb = 0;
+
+        rgb |= (ubyte(icoImage[colorTableOffset + index * 4
+                + 2]));
+        rgb <<= 8;
+        rgb |= (ubyte(icoImage[colorTableOffset + index * 4
+                + 1]));
+        rgb <<= 8;
+        rgb |= (ubyte(icoImage[colorTableOffset + index
+                * 4]));
+        return rgb;
     }
 
     private int ubyte(byte b) {
@@ -667,7 +667,7 @@ public class CursorLoader implements AssetLoader {
                 hotspotx = 0;
                 hotspoty = height - 1;
             }
-//            System.out.println("Image type = " + (type == 1 ? "CUR" : "ICO"));
+
             if (rate == 0) {
                 rate = jiffy;
             }

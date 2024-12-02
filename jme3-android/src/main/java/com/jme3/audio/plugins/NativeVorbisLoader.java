@@ -46,32 +46,32 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 public class NativeVorbisLoader implements AssetLoader {
-    
+
     private static class VorbisInputStream extends InputStream implements SeekableStream {
 
         private final AssetFileDescriptor afd;
         private final NativeVorbisFile file;
-        
+
         public VorbisInputStream(AssetFileDescriptor afd, NativeVorbisFile file) {
             this.afd = afd;
             this.file = file;
         }
-        
+
         @Override
         public int read() throws IOException {
             return 0;
         }
-        
+
         @Override
         public int read(byte[] buf) throws IOException {
             return file.readIntoArray(buf, 0, buf.length);
         }
-        
+
         @Override
         public int read(byte[] buf, int off, int len) throws IOException {
             return file.readIntoArray(buf, off, len);
         }
-        
+
         @Override
         public long skip(long n) throws IOException {
             throw new IOException("Not supported for audio streams");
@@ -85,22 +85,22 @@ public class NativeVorbisLoader implements AssetLoader {
                 throw new RuntimeException(ex);
             }
         }
-        
+
         @Override
         public void close() throws IOException {
             file.clearResources();
             afd.close();
         }
     }
-    
+
     private static AudioBuffer loadBuffer(AssetInfo assetInfo) throws IOException {
         AndroidAssetInfo aai = (AndroidAssetInfo) assetInfo;
         AssetFileDescriptor afd = null;
         NativeVorbisFile file = null;
         try {
-            afd = aai.openFileDescriptor();
-            int fd = afd.getParcelFileDescriptor().getFd();
-            file = new NativeVorbisFile(fd, afd.getStartOffset(), afd.getLength());
+            afd = openFileDescriptor(aai);
+            file = createNativeVorbisFile(afd);
+
             ByteBuffer data = BufferUtils.createByteBuffer(file.totalBytes);
             file.readIntoBuffer(data);
             AudioBuffer ab = new AudioBuffer();
@@ -108,54 +108,68 @@ public class NativeVorbisLoader implements AssetLoader {
             ab.updateData(data);
             return ab;
         } finally {
-            if (file != null) {
-                file.clearResources();
-            }
-            if (afd != null) {
-                afd.close();
-            }
+            closeResources(afd, file);
         }
     }
-    
+
     private static AudioStream loadStream(AssetInfo assetInfo) throws IOException {
         AndroidAssetInfo aai = (AndroidAssetInfo) assetInfo;
         AssetFileDescriptor afd = null;
         NativeVorbisFile file = null;
         boolean success = false;
-        
+
         try {
-            afd = aai.openFileDescriptor();
-            int fd = afd.getParcelFileDescriptor().getFd();
-            file = new NativeVorbisFile(fd, afd.getStartOffset(), afd.getLength());
-            
+            afd = openFileDescriptor(aai);
+            file = createNativeVorbisFile(afd);
+
             AudioStream stream = new AudioStream();
             stream.setupFormat(file.channels, 16, file.sampleRate);
             stream.updateData(new VorbisInputStream(afd, file), file.duration);
-            
+
             success = true;
-            
             return stream;
         } finally {
             if (!success) {
-                if (file != null) {
-                    file.clearResources();
-                }
-                if (afd != null) {
-                    afd.close();
-                }
+                closeResources(afd, file);
             }
         }
     }
-    
+
+    // Helper method to open file descriptor
+    private static AssetFileDescriptor openFileDescriptor(AndroidAssetInfo aai) throws IOException {
+        return aai.openFileDescriptor();
+    }
+
+    // Helper method to create a NativeVorbisFile
+    private static NativeVorbisFile createNativeVorbisFile(AssetFileDescriptor afd) throws IOException {
+        int fd = afd.getParcelFileDescriptor().getFd();
+        return new NativeVorbisFile(fd, afd.getStartOffset(), afd.getLength());
+    }
+
+    // Helper method to close resources
+    private static void closeResources(AssetFileDescriptor afd, NativeVorbisFile file) {
+        if (file != null) {
+            file.clearResources();
+        }
+        if (afd != null) {
+            try {
+                afd.close();
+            } catch (IOException e) {
+                System.out.println("Error closing resources "+e.getClass());//can be logged with a logger
+                //e.printStackTrace(); // handle or log exception appropriately
+            }
+        }
+    }
+
     @Override
     public Object load(AssetInfo assetInfo) throws IOException {
         AudioKey key = (AudioKey) assetInfo.getKey();
         if (!(assetInfo instanceof AndroidLocator.AndroidAssetInfo)) {
-            throw new UnsupportedOperationException("Cannot load audio files from classpath." + 
-                                                    "Place your audio files in " +
-                                                    "Android's assets directory");
+            throw new UnsupportedOperationException("Cannot load audio files from classpath." +
+                    "Place your audio files in " +
+                    "Android's assets directory");
         }
-        
+
         if (key.isStream()) {
             return loadStream(assetInfo);
         } else {

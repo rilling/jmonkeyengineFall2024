@@ -248,8 +248,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
 
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
-        throwable.printStackTrace();
-        showErrorDialog(throwable, throwable.getClass().getName());
+        System.out.println("Error closing resources "+errorMsg.getClass());//can be logged with a logger
         if (onExceptionThrown != null) {
             onExceptionThrown.onExceptionThrown(throwable);
         }
@@ -355,24 +354,33 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
             return;
         }
         glSurfaceView.onResume();
-        /*resume the audio*/
+        toggleSensors(true);
+        jmeSurfaceViewLogger.log(Level.INFO, "Game returns from the idle mode");
+    }
+
+    public void toggleSensors(boolean inGain){
+        /*toggle the audio*/
+        if(!inGain) legacyApplication.loseFocus();
         final AudioRenderer audioRenderer = legacyApplication.getAudioRenderer();
         if (audioRenderer != null) {
-            audioRenderer.resumeAll();
+            if(inGain) audioRenderer.resumeAll();
+            else audioRenderer.pauseAll();
         }
-        /*resume the sensors (aka joysticks)*/
+        /*toggle the sensors (aka joysticks)*/
         if (legacyApplication.getContext() != null) {
             final JoyInput joyInput = legacyApplication.getContext().getJoyInput();
             if (joyInput != null) {
                 if (joyInput instanceof AndroidSensorJoyInput) {
                     final AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
-                    androidJoyInput.resumeSensors();
+                    if(inGain) androidJoyInput.resumeSensors();
+                    else androidJoyInput.pauseSensors();
+
                 }
             }
-            legacyApplication.gainFocus();
+            if(inGain)legacyApplication.gainFocus();
         }
-        setGLThreadPaused(false);
-        jmeSurfaceViewLogger.log(Level.INFO, "Game returns from the idle mode");
+        setGLThreadPaused(!inGain);
+
     }
 
     @Override
@@ -382,23 +390,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
             return;
         }
         glSurfaceView.onPause();
-        /*pause the audio*/
-        legacyApplication.loseFocus();
-        final AudioRenderer audioRenderer = legacyApplication.getAudioRenderer();
-        if (audioRenderer != null) {
-            audioRenderer.pauseAll();
-        }
-        /*pause the sensors (aka joysticks)*/
-        if (legacyApplication.getContext() != null) {
-            final JoyInput joyInput = legacyApplication.getContext().getJoyInput();
-            if (joyInput != null) {
-                if (joyInput instanceof AndroidSensorJoyInput) {
-                    final AndroidSensorJoyInput androidJoyInput = (AndroidSensorJoyInput) joyInput;
-                    androidJoyInput.pauseSensors();
-                }
-            }
-        }
-        setGLThreadPaused(true);
+        toggleSensors(false);
         jmeSurfaceViewLogger.log(Level.INFO, "Game goes idle");
     }
 

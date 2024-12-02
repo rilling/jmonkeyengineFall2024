@@ -196,6 +196,7 @@ public class VideoRecorderAppState extends AbstractAppState {
         app.setTimer(oldTimer);
         initialized = false;
         file = null;
+        shutdownExecutor();
         super.cleanup();
     }
 
@@ -355,6 +356,9 @@ public class VideoRecorderAppState extends AbstractAppState {
                 try {
                     Thread.sleep(difference);
                 } catch (InterruptedException ex) {
+                    // Re-interrupt the thread
+                    Thread.currentThread().interrupt(); // Preserve the interrupt status
+                    // Optional: Log or perform any necessary cleanup
                 }
             }
             this.ticks++;
@@ -363,6 +367,19 @@ public class VideoRecorderAppState extends AbstractAppState {
         @Override
         public void reset() {
             this.ticks = 0;
+        }
+    }
+    private void shutdownExecutor() {
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
