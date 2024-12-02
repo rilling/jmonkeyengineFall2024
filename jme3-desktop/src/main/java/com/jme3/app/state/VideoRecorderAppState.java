@@ -244,6 +244,7 @@ public class VideoRecorderAppState extends AbstractAppState {
 
         initialized = false;
         file = null;
+        shutdownExecutor();
 
         super.cleanup();
     }
@@ -422,6 +423,19 @@ public class VideoRecorderAppState extends AbstractAppState {
         @Override
         public void reset() {
             this.ticks = 0;
+        }
+    }
+    private void shutdownExecutor() {
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
