@@ -246,15 +246,16 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
             }
         });
     }
-
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
         Log.e("JmeSurfaceView", "Error occurred: " + errorMsg, throwable);
+        System.out.println("Error closing resources " + throwable.getClass()); // can be logged with a logger
         showErrorDialog(throwable, throwable.getClass().getName());
         if (onExceptionThrown != null) {
             onExceptionThrown.onExceptionThrown(throwable);
         }
     }
+
 
     /**
      * A state change observer to the holder Activity life cycle, used to keep this android view up-to-date with the holder activity life cycle.
