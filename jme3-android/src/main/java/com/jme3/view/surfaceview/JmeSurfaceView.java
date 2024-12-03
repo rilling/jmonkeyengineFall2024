@@ -248,9 +248,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
     }
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
-        Log.e("JmeSurfaceView", "Error occurred: " + errorMsg, throwable);
-        System.out.println("Error closing resources " + throwable.getClass()); // can be logged with a logger
-        showErrorDialog(throwable, throwable.getClass().getName());
+        System.out.println("Error closing resources " + errorMsg.getClass()); // can be logged with a logger
         if (onExceptionThrown != null) {
             onExceptionThrown.onExceptionThrown(throwable);
         }
