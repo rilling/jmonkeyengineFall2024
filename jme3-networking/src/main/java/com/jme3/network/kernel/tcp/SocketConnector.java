@@ -43,7 +43,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
+import javax.net.ssl.*;
+import java.security.SecureRandom;
 
 
 /**
@@ -54,102 +55,118 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  @version   $Revision$
  *  @author    Paul Speed
  */
-public class SocketConnector implements Connector {
-    private SSLSocket sslSocket;
+public class SocketConnector implements Connector
+{
+    private SSLSocket sock;
     private InputStream in;
     private OutputStream out;
     private SocketAddress remoteAddress;
     private byte[] buffer = new byte[65535];
-    private AtomicBoolean connected = new AtomicBoolean(false);
+    private boolean connected = false;
 
-    public SocketConnector(InetAddress address, int port) throws IOException {
-        // Create an SSLSocket using SSLSocketFactory
-        SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        this.sslSocket = (SSLSocket) sslSocketFactory.createSocket(address, port);
-        remoteAddress = sslSocket.getRemoteSocketAddress(); // For informational purposes
+    public SocketConnector( InetAddress address, int port ) throws IOException
+    {
+        try {
+            // Initialize SSLContext with the default key and trust managers
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, null, new SecureRandom());
 
-        // Set SSL-specific options (if needed)
-        sslSocket.setEnabledCipherSuites(sslSocket.getSupportedCipherSuites());
+            // Create an SSLSocketFactory
+            SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
-        // Disable Nagle's buffering to send data immediately
-        sslSocket.setTcpNoDelay(true);
+            // SSLSocket connected to the provided address and port
+            this.sock = (SSLSocket) sslSocketFactory.createSocket(address, port);
+            this.remoteAddress = sock.getRemoteSocketAddress(); // For informational purposes
 
-        // Initialize input and output streams using SSL socket
-        in = sslSocket.getInputStream();
-        out = sslSocket.getOutputStream();
+            // Desired SSL protocols
+            sock.setEnabledProtocols(new String[]{"TLSv1.2", "TLSv1.3"});
 
-        connected.set(true);
-    }
+            sock.setTcpNoDelay(true);
 
-    protected void checkClosed() {
-        if (sslSocket == null) {
-            throw new ConnectorException("Connection is closed: " + remoteAddress);
+            // Initialize input and output streams securely
+            this.in = sock.getInputStream();
+            this.out = sock.getOutputStream();
+
+            this.connected = true; // Connected
+        } catch (Exception e) {
+            throw new IOException("Failed to establish SSL connection", e);
         }
     }
-
+ 
+    protected void checkClosed()
+    {
+        if( sock == null )
+            throw new ConnectorException( "Connection is closed:" + remoteAddress );
+    }
+     
     @Override
-    public boolean isConnected() {
-        if (sslSocket == null) {
+    public boolean isConnected()
+    {
+        if( sock == null )
             return false;
-        }
-        return sslSocket.isConnected();
+        return sock.isConnected();
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         checkClosed();
         try {
-            SSLSocket temp = sslSocket;
-            sslSocket = null;
-            connected.set(false);
+            Socket temp = sock;
+            sock = null;            
+            connected = false;
             temp.close();
-        } catch (IOException e) {
-            throw new ConnectorException("Error closing socket for: " + remoteAddress, e);
-        }
-    }
+        } catch( IOException e ) {            
+            throw new ConnectorException( "Error closing socket for:" + remoteAddress, e );
+        }            
+    }     
 
     @Override
-    public boolean available() {
+    public boolean available()
+    {
         checkClosed();
         try {
             return in.available() > 0;
-        } catch (IOException e) {
-            throw new ConnectorException("Error retrieving data availability for: " + remoteAddress, e);
-        }
-    }
-
+        } catch( IOException e ) {
+            throw new ConnectorException( "Error retrieving data availability for:" + remoteAddress, e );
+        }       
+    }     
+    
     @Override
-    public ByteBuffer read() {
+    public ByteBuffer read()
+    {
         checkClosed();
-
+        
         try {
             // Read what we can
             int count = in.read(buffer);
-            if (count < 0) {
+            if( count < 0 ) {
                 // Socket is closed
                 close();
                 return null;
             }
 
             // Wrap it in a ByteBuffer for the caller
-            return ByteBuffer.wrap(buffer, 0, count);
-        } catch (IOException e) {
-            if (!connected.get()) {
+            return ByteBuffer.wrap( buffer, 0, count ); 
+        } catch( IOException e ) {
+            if( !connected) {
                 // Nothing to see here... just move along
                 return null;
-            }
-            throw new ConnectorException("Error reading from connection to: " + remoteAddress, e);
-        }
+            }        
+            throw new ConnectorException( "Error reading from connection to:" + remoteAddress, e );    
+        }                
     }
-
+    
     @Override
-    public void write(ByteBuffer data) {
+    public void write( ByteBuffer data )
+    {
         checkClosed();
-
+        
         try {
             out.write(data.array(), data.position(), data.remaining());
-        } catch (IOException e) {
-            throw new ConnectorException("Error writing to connection: " + remoteAddress, e);
+        } catch( IOException e ) {
+            throw new ConnectorException( "Error writing to connection:" + remoteAddress, e );
         }
-    }
+    }   
+    
 }

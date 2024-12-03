@@ -86,7 +86,7 @@ public final class GLRenderer implements Renderer {
 
     private static final Logger logger = Logger.getLogger(GLRenderer.class.getName());
     private static final boolean VALIDATE_SHADER = false;
-    private static final Pattern GLVERSION_PATTERN = Pattern.compile(".*?(\\d+)\\.(\\d+).*");
+    private static final Pattern GLVERSION_PATTERN = Pattern.compile("\\b(\\d+)\\.(\\d+)\\b");
 
     private final ByteBuffer nameBuf = BufferUtils.createByteBuffer(250);
     private final FloatBuffer floatBuf16 = BufferUtils.createFloatBuffer(16);
