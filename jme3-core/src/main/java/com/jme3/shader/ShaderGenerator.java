@@ -236,7 +236,7 @@ public abstract class ShaderGenerator {
     protected void appendNodeDeclarationAndMain(String loadedSource, StringBuilder sourceDeclaration, StringBuilder source, ShaderNode shaderNode, ShaderGenerationInfo info, String shaderPath) {
         if (loadedSource.length() > 1) {
             loadedSource = loadedSource.substring(0, loadedSource.lastIndexOf("}"));
-            String[] sourceParts = loadedSource.split("\\s+void\\s*main\\s*\\(\\s*\\)\\s*\\{");
+            String[] sourceParts = loadedSource.split("\\s*void\\s+main\\s*\\(\\s*\\)\\s*\\{");
             if(sourceParts.length<2){
                 throw new IllegalArgumentException("Syntax error in "+ shaderPath +". Cannot find 'void main(){' in \n"+ loadedSource);
             }
