@@ -45,6 +45,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.jme3.util.res.Resources;
 
@@ -380,27 +384,28 @@ public final class NativeLibraryLoader {
     }
 
     public static void extractNativeLibraries(Platform platform, File targetDir) throws IOException {
-        // Define the base directory where extraction is allowed
-        File baseDir = new File("allowed/base/directory").getCanonicalFile();
+    // Ensure the target directory is canonicalized and sanitized
+    Path canonicalTargetDir = targetDir.toPath().toRealPath(); // Resolves any symlinks or relative paths
 
-        // Validate the target directory path
-        Path targetPath = targetDir.toPath().normalize(); // Normalize to resolve ".." or "."
-        if (!targetPath.startsWith(baseDir.toPath())) {
-            throw new SecurityException("Path traversal attempt detected: " + targetDir.getPath());
-        }
-            // Proceed with extracting native libraries if validation passes
-        for (Map.Entry<NativeLibrary.Key, NativeLibrary> lib : nativeLibraryMap.entrySet()) {
-            if (lib.getValue().getPlatform() == platform) {
-                if (!targetDir.exists()) {
-                    boolean dirsCreated = targetDir.mkdirs();
-                    if (!dirsCreated) {
-                        throw new IOException("Failed to create target directory: " + targetDir.getPath());
-                    }
-                }
-                extractNativeLibrary(platform, lib.getValue().getName(), targetDir);
+    for (Map.Entry<NativeLibrary.Key, NativeLibrary> lib : nativeLibraryMap.entrySet()) {
+        if (lib.getValue().getPlatform() == platform) {
+            // Validate the directory before proceeding
+            Path entryPath = new File(targetDir, lib.getValue().getName()).toPath().normalize();
+
+            // Ensure the entryPath is within the canonicalTargetDir
+            if (!entryPath.startsWith(canonicalTargetDir)) {
+                throw new IOException("Path traversal detected: " + entryPath);
             }
+
+            if (!targetDir.exists()) {
+                targetDir.mkdirs();
+            }
+
+            extractNativeLibrary(platform, lib.getValue().getName(), targetDir);
         }
     }
+}
+
     
     /**
      * Removes platform-specific portions of a library file name so
@@ -557,9 +562,11 @@ public final class NativeLibraryLoader {
                         "The required native library '" + library.getName() + "'"
                                 + " was not found in the classpath via '" + pathInJar);
             } else if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "The optional native library ''{0}''" +
-                                " was not found in the classpath via ''{1}''.",
-                        new Object[]{library.getName(), pathInJar});
+                logger.log(Level.FINE,
+                        "The optional native library ''{0}''"
+                                + " was not found in the classpath via ''{1}''.",
+                        new Object[] { library.getName().replaceAll("[\\r\\n]", ""),
+                                pathInJar.replaceAll("[\\r\\n]", "") });
             }
             return;
         }
