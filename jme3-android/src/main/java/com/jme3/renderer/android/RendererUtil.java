@@ -49,7 +49,7 @@ public class RendererUtil {
      * When set to true, every OpenGL call will check for errors and throw an
      * exception if there is one, if false, no error checking is performed.
      */
-    public static boolean ENABLE_ERROR_CHECKING = true;
+    public static final boolean ENABLE_ERROR_CHECKING = true;
 
     /**
      * A private constructor to inhibit instantiation of this class.

@@ -41,8 +41,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
@@ -106,7 +108,9 @@ public class XMLImporter implements JmeImporter {
             factory.setXIncludeAware(false);
             factory.setExpandEntityReferences(false);
 
-            domIn = new DOMInputCapsule(factory.newDocumentBuilder().parse(f), this);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(f);
+            domIn = new DOMInputCapsule(doc, this);
             return domIn.readSavable(null, null);
         } catch (SAXException | ParserConfigurationException e) {
             IOException ex = new IOException();

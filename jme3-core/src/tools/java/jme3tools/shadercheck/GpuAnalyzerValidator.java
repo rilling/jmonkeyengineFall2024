@@ -54,59 +54,73 @@ public class GpuAnalyzerValidator implements Validator {
         }
         return version;
     }
-    private static void executeAnalyzer(String sourceCode, String language, String defines, String asic, StringBuilder results){
+    private static void executeAnalyzer(String sourceCode, String language, String defines, String asic, StringBuilder results) {
         try {
-            // Export sourcecode to temporary file
-            File tempFile = File.createTempFile("test_shader", ".glsl");
-            FileWriter writer = new FileWriter(tempFile);
-            
-            String glslVer = language.substring(4);
-            writer.append("#version ").append(glslVer).append('\n');
-            writer.append("#extension all : warn").append('\n');
-            writer.append(defines).append('\n');
-            writer.write(sourceCode);
-            writer.close();
+            // Export source code to a secure temporary file
+            File tempFile = File.createTempFile("test_shader", ".glsl", new File(System.getProperty("java.io.tmpdir")));
 
-            ProcessBuilder pb = new ProcessBuilder("GPUShaderAnalyzer", 
-                                                   tempFile.getAbsolutePath(),
-                                                   "-I",
-                                                   "-ASIC", asic);
-                                                   
+            // Set secure file permissions and validate results
+            if (!tempFile.setReadable(false, false)) {
+                logger.log(Level.WARNING, "Failed to set temp file as non-readable for others: {0}", tempFile.getAbsolutePath());
+            }
+            if (!tempFile.setWritable(true, true)) {
+                logger.log(Level.WARNING, "Failed to set temp file as writable for the owner: {0}", tempFile.getAbsolutePath());
+            }
+            if (!tempFile.setExecutable(false, false)) {
+                logger.log(Level.WARNING, "Failed to disable execute permissions on temp file: {0}", tempFile.getAbsolutePath());
+            }
+
+            try (FileWriter writer = new FileWriter(tempFile)) {
+                String glslVer = language.substring(4);
+                writer.append("#version ").append(glslVer).append('\n');
+                writer.append("#extension all : warn").append('\n');
+                writer.append(defines).append('\n');
+                writer.write(sourceCode);
+            }
+
+            ProcessBuilder pb = new ProcessBuilder("GPUShaderAnalyzer",
+                    tempFile.getAbsolutePath(),
+                    "-I",
+                    "-ASIC", asic);
+
             Process p = pb.start();
-            
-            Scanner scan = new Scanner(p.getInputStream());
-            
-            if (!scan.hasNextLine()){
-                String x = scan.next();
-                System.out.println(x);
-            }
-            
-            String ln = scan.nextLine();
-            
-            if (ln.startsWith(";")){
-                results.append(" - Success!").append('\n');
-            }else{
-                results.append(" - Failure!").append('\n');
-                results.append(ln).append('\n');
-                while (scan.hasNextLine()){
-                    results.append(scan.nextLine()).append('\n');
-                }
-            }
 
-            scan.close();
+            try (Scanner scan = new Scanner(p.getInputStream())) {
+                if (!scan.hasNextLine()) {
+                    String x = scan.next();
+                    System.out.println(x);
+                }
+
+                String ln = scan.nextLine();
+
+                if (ln.startsWith(";")) {
+                    results.append(" - Success!").append('\n');
+                } else {
+                    results.append(" - Failure!").append('\n');
+                    results.append(ln).append('\n');
+                    while (scan.hasNextLine()) {
+                        results.append(scan.nextLine()).append('\n');
+                    }
+                }
+            }   
+
             p.getOutputStream().close();
             p.getErrorStream().close();
-            
+
             p.waitFor();
             p.destroy();
-            
-            tempFile.delete();
+
+            // Delete the temporary file securely
+            if (!tempFile.delete()) {
+                logger.log(Level.WARNING, "Temporary file could not be deleted: {0}", tempFile.getAbsolutePath());
+            }
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt(); // Restore the interrupted status
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "IOEx", ex);
+            logger.log(Level.SEVERE, "IOException occurred", ex);
         }
     }
-    
+
     @Override
     public void validate(Shader shader, StringBuilder results) {
         for (ShaderSource source : shader.getSources()){
@@ -121,5 +135,5 @@ public class GpuAnalyzerValidator implements Validator {
             }
         }
     }
-    
+
 }

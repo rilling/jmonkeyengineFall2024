@@ -31,7 +31,6 @@
  */
 package com.jme3.app.state;
 
-import android.graphics.Bitmap;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,19 +42,28 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import android.graphics.Bitmap;
+
 /**
  * Released under BSD License
  * @author monceaux, normenhansen, entrusC
  */
 public class MjpegFileWriter {
     private static final Logger logger = Logger.getLogger(MjpegFileWriter.class.getName());
+    private static final String ENCRYPTION_ALGORITHM = "AES";
+    private static final byte[] KEY = "YourSecretKey123".getBytes();
 
     int width = 0;
     int height = 0;
     double framerate = 0;
     int numFrames = 0;
     File aviFile = null;
-    FileOutputStream aviOutput = null;
+    CipherOutputStream encryptedOutput = null;
     FileChannel aviChannel = null;
     long riffOffset = 0;
     long aviMovieOffset = 0;
@@ -71,18 +79,29 @@ public class MjpegFileWriter {
         this.height = height;
         this.framerate = framerate;
         this.numFrames = numFrames;
-        aviOutput = new FileOutputStream(aviFile);
-        aviChannel = aviOutput.getChannel();
+
+        SecretKey secretKey = new SecretKeySpec(KEY, ENCRYPTION_ALGORITHM);
+        Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+        FileOutputStream fileOut = new FileOutputStream(aviFile) {
+            @Override
+            public FileChannel getChannel() {
+                return super.getChannel();
+            }
+        };
+        encryptedOutput = new CipherOutputStream(fileOut, cipher);
+        aviChannel = fileOut.getChannel();
 
         RIFFHeader rh = new RIFFHeader();
-        aviOutput.write(rh.toBytes());
-        aviOutput.write(new AVIMainHeader().toBytes());
-        aviOutput.write(new AVIStreamList().toBytes());
-        aviOutput.write(new AVIStreamHeader().toBytes());
-        aviOutput.write(new AVIStreamFormat().toBytes());
-        aviOutput.write(new AVIJunk().toBytes());
+        encryptedOutput.write(rh.toBytes());
+        encryptedOutput.write(new AVIMainHeader().toBytes());
+        encryptedOutput.write(new AVIStreamList().toBytes());
+        encryptedOutput.write(new AVIStreamHeader().toBytes());
+        encryptedOutput.write(new AVIStreamFormat().toBytes());
+        encryptedOutput.write(new AVIJunk().toBytes());
         aviMovieOffset = aviChannel.position();
-        aviOutput.write(new AVIMovieList().toBytes());
+        encryptedOutput.write(new AVIMovieList().toBytes());
         indexlist = new AVIIndexList();
     }
 
@@ -105,12 +124,12 @@ public class MjpegFileWriter {
 
         indexlist.addAVIIndex((int) position, useLength);
 
-        aviOutput.write(fcc);
-        aviOutput.write(intBytes(swapInt(useLength)));
-        aviOutput.write(imagedata);
+        encryptedOutput.write(fcc);
+        encryptedOutput.write(intBytes(swapInt(useLength)));
+        encryptedOutput.write(imagedata);
         if (extra > 0) {
             for (int i = 0; i < extra; i++) {
-                aviOutput.write(0);
+                encryptedOutput.write(0);
             }
         }
 
@@ -120,8 +139,13 @@ public class MjpegFileWriter {
     public void finishAVI() throws Exception {
         logger.log(Level.INFO, "finishAVI");
         byte[] indexlistBytes = indexlist.toBytes();
-        aviOutput.write(indexlistBytes);
-        aviOutput.close();
+        encryptedOutput.write(indexlistBytes);
+        encryptedOutput.close();
+
+        SecretKey secretKey = new SecretKeySpec(KEY, ENCRYPTION_ALGORITHM);
+        Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
         int fileSize = (int)aviFile.length();
         logger.log(Level.INFO, "fileSize: {0}", fileSize);
         int listSize = (int) (fileSize - 8 - aviMovieOffset - indexlistBytes.length);
@@ -133,17 +157,19 @@ public class MjpegFileWriter {
         }
 
         RandomAccessFile raf = new RandomAccessFile(aviFile, "rw");
+        CipherOutputStream headerUpdate = new CipherOutputStream(new FileOutputStream(raf.getFD()), cipher);
 
         //add header and length by writing the headers again
         //with the now available information
-        raf.write(new RIFFHeader(fileSize).toBytes());
-        raf.write(new AVIMainHeader().toBytes());
-        raf.write(new AVIStreamList().toBytes());
-        raf.write(new AVIStreamHeader().toBytes());
-        raf.write(new AVIStreamFormat().toBytes());
-        raf.write(new AVIJunk().toBytes());
-        raf.write(new AVIMovieList(listSize).toBytes());
+        headerUpdate.write(new RIFFHeader(fileSize).toBytes());
+        headerUpdate.write(new AVIMainHeader().toBytes());
+        headerUpdate.write(new AVIStreamList().toBytes());
+        headerUpdate.write(new AVIStreamHeader().toBytes());
+        headerUpdate.write(new AVIStreamFormat().toBytes());
+        headerUpdate.write(new AVIJunk().toBytes());
+        headerUpdate.write(new AVIMovieList(listSize).toBytes());
 
+        headerUpdate.close();
         raf.close();
     }
 
