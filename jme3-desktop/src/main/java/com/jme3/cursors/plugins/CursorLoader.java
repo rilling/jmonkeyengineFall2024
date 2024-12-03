@@ -45,6 +45,8 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
@@ -167,7 +169,9 @@ public class CursorLoader implements AssetLoader {
                                 if (leIn.readInt() == 0x6e6f6369) { // we have 'icon'
                                     // We have an icon and from this point on
                                     // the rest is only icons.
-                                    int icoLength = leIn.readInt();
+                                    byte[] icoLengthBytes = new byte[4];
+                                    leIn.readFully(icoLengthBytes);
+                                    int icoLength = ByteBuffer.wrap(icoLengthBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
                                     ciDat.numImages = numIcons;
                                     icons = new ArrayList<byte[]>(numIcons);
                                     for (int i = 0; i < numIcons; i++) {

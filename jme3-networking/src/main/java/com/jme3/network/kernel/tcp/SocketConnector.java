@@ -33,6 +33,9 @@ package com.jme3.network.kernel.tcp;
 
 import com.jme3.network.kernel.Connector;
 import com.jme3.network.kernel.ConnectorException;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
