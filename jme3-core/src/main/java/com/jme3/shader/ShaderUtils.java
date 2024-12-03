@@ -123,7 +123,7 @@ public class ShaderUtils {
                     card = 0;
                 }
             } else {
-                card = Integer.parseInt(type.replaceAll(".*vec", ""));
+                card = type.startsWith("vec") ? Integer.parseInt(type.substring(3, 4)) : 0;
 
                 if (swizzling.length() > 0) {
                     card = swizzling.length();
