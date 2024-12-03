@@ -84,13 +84,15 @@ public class AndroidGestureProcessor implements
 
     @Override
     public void onShowPress(MotionEvent event) {
-        float jmeX = touchInput.getJmeX(event.getX());
-        float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
-        prepareTouchEvent(TouchEvent.Type.SHOWPRESS, event, jmeX, jmeY);
+        pressEventHandler(event, TouchEvent.Type.SHOWPRESS);
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
+        pressEventHandler(event, TouchEvent.Type.LONGPRESSED);
+    }
+
+    private void pressEventHandler(MotionEvent event, TouchEvent.Type eventType) {
         float jmeX = touchInput.getJmeX(event.getX());
         float jmeY = touchInput.invertY(touchInput.getJmeY(event.getY()));
         prepareTouchEvent(TouchEvent.Type.LONGPRESSED, event, jmeX, jmeY);

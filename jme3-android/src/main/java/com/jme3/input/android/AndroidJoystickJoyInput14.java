@@ -252,7 +252,11 @@ public class AndroidJoystickJoyInput14 {
 
         return consumed;
     }
-
+    private void logRemap(String original, String logicalId) {
+        if (logger.isLoggable(Level.FINE) && !Objects.equals(logicalId, original)) {
+            logger.log(Level.FINE, "Remapped: {0} to: {1}", new Object[]{original, logicalId});
+        }
+    }
     protected class AndroidJoystick extends AbstractJoystick {
 
         private JoystickAxis nullAxis;
@@ -335,13 +339,8 @@ public class AndroidJoystickJoyInput14 {
                 original = JoystickButton.BUTTON_11;
             }
 
-//            String logicalId = JoystickCompatibilityMappings.remapButton( getName(), original );
-//            if (logger.isLoggable(Level.FINE) && !Objects.equals(logicalId, original)) {
-//                logger.log(Level.FINE, "Remapped: {0} to: {1}",
-//                        new Object[]{original, logicalId});
-//            }
-            String logicalId = JoystickCompatibilityMappings.remapButton(getName(), original);
-            logRemappingIfNeeded(original, logicalId, logger);
+            String logicalId = JoystickCompatibilityMappings.remapButton( getName(), original );
+            logRemap(original, logicalId);
 
             JoystickButton button = new DefaultJoystickButton( getInputManager(), this, getButtonCount(),
                     name, logicalId );
@@ -349,6 +348,7 @@ public class AndroidJoystickJoyInput14 {
             buttonIndex.put( keyCode, button );
             return button;
         }
+
 
         protected JoystickAxis addAxis(MotionRange motionRange) {
 
@@ -368,10 +368,8 @@ public class AndroidJoystickJoyInput14 {
             } else if (motionRange.getAxis() == MotionEvent.AXIS_HAT_Y) {
                 original = JoystickAxis.POV_Y;
             }
-
-            String logicalId = JoystickCompatibilityMappings.remapAxis(getName(), original);
-            logRemappingIfNeeded(original, logicalId, logger);
-
+            String logicalId = JoystickCompatibilityMappings.remapAxis( getName(), original );
+            logRemap(original, logicalId);
             JoystickAxis axis = new DefaultJoystickAxis(getInputManager(),
                     this,
                     getAxisCount(),

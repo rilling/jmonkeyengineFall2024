@@ -110,7 +110,6 @@ public class XMLImporter implements JmeImporter {
 
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(f);
-
             domIn = new DOMInputCapsule(doc, this);
             return domIn.readSavable(null, null);
         } catch (SAXException | ParserConfigurationException e) {

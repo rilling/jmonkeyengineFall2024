@@ -47,6 +47,7 @@ import java.net.URL;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import java.util.logging.*;
 
 /**
  * @author Kirill Vainer
@@ -71,6 +72,7 @@ public class AppletHarness extends Applet {
     @SuppressWarnings("unchecked")
     private void createCanvas(){
         AppSettings settings = new AppSettings(true);
+        Logger logger = Logger.getLogger(this.getClass().getName());
 
         // load app cfg
         if (appCfg != null){
@@ -80,6 +82,9 @@ public class AppletHarness extends Applet {
                 settings.load(in);
                 in.close();
             } catch (IOException ex){
+                // Log the exception securely
+                logger.log(Level.SEVERE, "Error loading applet configuration", ex);
+
                 // Called before application has been created ....
                 // Display error message through AWT
                 JOptionPane.showMessageDialog(this, "An error has occurred while "
@@ -87,7 +92,6 @@ public class AppletHarness extends Applet {
                                                   + ex.getMessage(),
                                               "jME3 Applet",
                                               JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
             } finally {
                 if (in != null)
                     try {

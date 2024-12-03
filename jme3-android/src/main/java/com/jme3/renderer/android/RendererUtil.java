@@ -157,6 +157,6 @@ public class RendererUtil {
         if (!ENABLE_ERROR_CHECKING) {
             return;
         }
-        checkAndThrowGLError();
+        checkGLErrorForced();
     }
 }
