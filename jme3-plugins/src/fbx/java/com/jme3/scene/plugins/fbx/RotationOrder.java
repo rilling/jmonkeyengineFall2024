@@ -9,9 +9,20 @@ public enum RotationOrder {
     EULER_XYZ, EULER_XZY, EULER_YZX, EULER_YXZ, EULER_ZXY, EULER_ZYX, SPHERIC_XYZ;
 
     // Static values field for fast access by ordinal without Enum.values() overhead
-    public static final RotationOrder[] values = values();
+    private static final RotationOrder[] VALUES = RotationOrder.values();
 
     private RotationOrder() {
+    }
+    // Public method to access a copy of the enum values
+    public static RotationOrder[] getValues() {
+        return VALUES.clone(); // Return a defensive copy
+    }
+    // Optional: Fast lookup by ordinal if needed
+    public static RotationOrder byOrdinal(int ordinal) {
+        if (ordinal < 0 || ordinal >= VALUES.length) {
+            throw new IllegalArgumentException("Invalid ordinal");
+        }
+        return VALUES[ordinal];
     }
 
     public Quaternion rotate(Vector3f vec) {

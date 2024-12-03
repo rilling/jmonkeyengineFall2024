@@ -65,7 +65,7 @@ public class EnvMapUtils {
     public final static int NUM_SH_COEFFICIENT = 9;
     // See Peter-Pike Sloan paper for these coefficients
     //http://www.ppsloan.org/publications/StupidSH36.pdf
-    public static float[] shBandFactor = {1.0f,
+    private static float[] shBandFactor = {1.0f,
         2.0f / 3.0f, 2.0f / 3.0f, 2.0f / 3.0f,
         1.0f / 4.0f, 1.0f / 4.0f, 1.0f / 4.0f, 1.0f / 4.0f, 1.0f / 4.0f};
 
@@ -94,6 +94,10 @@ public class EnvMapUtils {
      * A private constructor to inhibit instantiation of this class.
      */
     private EnvMapUtils() {
+    }
+
+    public static float[] getShBandFactor() {
+        return shBandFactor.clone();
     }
 
     /**
