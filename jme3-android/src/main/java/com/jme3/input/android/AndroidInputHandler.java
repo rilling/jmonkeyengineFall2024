@@ -179,15 +179,14 @@ public class AndroidInputHandler implements View.OnTouchListener, View.OnKeyList
     public boolean onTouch(View view, MotionEvent event) {
         return processTouchEvent(view, event);
     }
-
     protected boolean consumeEvent(KeyEvent event, Object touchInput, Object joyInput) {
         int source = event.getSource();
 
-        boolean isTouch = ((source & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN)
-                || ((source & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
+        boolean isTouch = ((source & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN) ||
+                ((source & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
 
-        boolean isJoystick = ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+        boolean isJoystick = ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) ||
+                ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
 
         boolean isUnknown = (source & InputDevice.SOURCE_UNKNOWN) == InputDevice.SOURCE_UNKNOWN;
 
@@ -201,7 +200,7 @@ public class AndroidInputHandler implements View.OnTouchListener, View.OnKeyList
 
         // Check if joyInput should consume the event
         if (isJoystick && joyInput != null) {
-            consumed |= ((AndroidJoyInput14) joyInput).onKey(event);
+            consumed |= ((AndroidJoyInput14)joyInput).onKey(event);
         }
 
         return consumed;

@@ -33,6 +33,9 @@ package com.jme3.network.kernel.tcp;
 
 import com.jme3.network.kernel.Connector;
 import com.jme3.network.kernel.ConnectorException;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,7 +43,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
+import javax.net.ssl.*;
+import java.security.SecureRandom;
 
 
 /**
@@ -53,26 +57,40 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SocketConnector implements Connector
 {
-    private Socket sock;
+    private SSLSocket sock;
     private InputStream in;
     private OutputStream out;
     private SocketAddress remoteAddress;
     private byte[] buffer = new byte[65535];
-    private AtomicBoolean connected = new AtomicBoolean(false);
+    private boolean connected = false;
 
     public SocketConnector( InetAddress address, int port ) throws IOException
     {
-        this.sock = new Socket(address, port);
-        remoteAddress = sock.getRemoteSocketAddress(); // for info purposes 
-        
-        // Disable Nagle's buffering so data goes out when we
-        // put it there.
-        sock.setTcpNoDelay(true);
-        
-        in = sock.getInputStream();
-        out = sock.getOutputStream();
-        
-        connected.set(true);
+        try {
+            // Initialize SSLContext with the default key and trust managers
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, null, new SecureRandom());
+
+            // Create an SSLSocketFactory
+            SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            // SSLSocket connected to the provided address and port
+            this.sock = (SSLSocket) sslSocketFactory.createSocket(address, port);
+            this.remoteAddress = sock.getRemoteSocketAddress(); // For informational purposes
+
+            // Desired SSL protocols
+            sock.setEnabledProtocols(new String[]{"TLSv1.2", "TLSv1.3"});
+
+            sock.setTcpNoDelay(true);
+
+            // Initialize input and output streams securely
+            this.in = sock.getInputStream();
+            this.out = sock.getOutputStream();
+
+            this.connected = true; // Connected
+        } catch (Exception e) {
+            throw new IOException("Failed to establish SSL connection", e);
+        }
     }
  
     protected void checkClosed()
@@ -96,7 +114,7 @@ public class SocketConnector implements Connector
         try {
             Socket temp = sock;
             sock = null;            
-            connected.set(false);
+            connected = false;
             temp.close();
         } catch( IOException e ) {            
             throw new ConnectorException( "Error closing socket for:" + remoteAddress, e );
@@ -131,7 +149,7 @@ public class SocketConnector implements Connector
             // Wrap it in a ByteBuffer for the caller
             return ByteBuffer.wrap( buffer, 0, count ); 
         } catch( IOException e ) {
-            if( !connected.get() ) {
+            if( !connected) {
                 // Nothing to see here... just move along
                 return null;
             }        
