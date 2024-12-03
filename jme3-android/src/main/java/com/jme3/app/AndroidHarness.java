@@ -340,17 +340,14 @@ public class AndroidHarness extends Activity implements TouchListener, DialogInt
 
         if (t != null) {
             // Convert exception to string
-            StringWriter sw = new StringWriter(100);
-            t.printStackTrace(new PrintWriter(sw));
-            stackTrace = sw.toString();
+            stackTrace = "Uncaught Exception:" + "\n" + Log.getStackTraceString(t);
             title = t.toString();
         }
 
         final String finalTitle = title;
-        final String finalMsg = (errorMsg != null ? errorMsg : "Uncaught Exception")
-                + "\n" + stackTrace;
+        final String finalMsg = (errorMsg != null ? errorMsg : "An error occurred.");
 
-        logger.log(Level.SEVERE, finalMsg);
+        logger.log(Level.SEVERE, stackTrace);
 
         runOnUiThread(() -> {
             AlertDialog dialog = new AlertDialog.Builder(AndroidHarness.this) // .setIcon(R.drawable.alert_dialog_icon)

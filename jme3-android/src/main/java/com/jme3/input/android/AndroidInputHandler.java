@@ -107,7 +107,7 @@ public class AndroidInputHandler implements View.OnTouchListener, View.OnKeyList
     }
 
     public TouchInput getTouchInput() {
-        return touchInput;
+        return new AndroidTouchInput(this);
     }
 
     public JoyInput getJoyInput() {

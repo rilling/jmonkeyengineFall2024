@@ -674,7 +674,7 @@ public class AndroidHarnessFragment extends Fragment implements
 //            logger.log(Level.INFO, "surfaceview layout changed. left: {0}, top: {1}, right: {2}, bottom: {3}",
 //                    new Object[]{left, top, right, bottom});
 
-            if (v.equals(view) && maxResolutionDimension > 0) {
+            if (maxResolutionDimension > 0) {
                 int newWidth = right-left;
                 int newHeight = bottom-top;
 

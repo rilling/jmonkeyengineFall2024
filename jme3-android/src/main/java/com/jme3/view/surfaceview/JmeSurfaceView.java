@@ -42,6 +42,7 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -245,7 +246,6 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
             }
         });
     }
-
     @Override
     public void handleError(String errorMsg, Throwable throwable) {
         System.out.println("Error closing resources "+errorMsg.getClass());//can be logged with a logger
@@ -253,6 +253,7 @@ public class JmeSurfaceView extends RelativeLayout implements SystemListener, Di
             onExceptionThrown.onExceptionThrown(throwable);
         }
     }
+
 
     /**
      * A state change observer to the holder Activity life cycle, used to keep this android view up-to-date with the holder activity life cycle.
