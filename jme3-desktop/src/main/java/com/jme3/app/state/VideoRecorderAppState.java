@@ -243,6 +243,16 @@ public class VideoRecorderAppState extends AbstractAppState {
         }
 
         initialized = false;
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        initialized = false;
         file = null;
         shutdownExecutor();
 
@@ -304,9 +314,11 @@ public class VideoRecorderAppState extends AbstractAppState {
                         return null;
                     }
                 });
-            } catch (InterruptedException ex) {
+            }catch (InterruptedException ex) {
                 Logger.getLogger(VideoRecorderAppState.class.getName()).log(Level.SEVERE, null, ex);
+                Thread.currentThread().interrupt(); // Preserve the interrupted status
             }
+
         }
 
         @Override
